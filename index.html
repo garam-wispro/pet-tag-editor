@@ -1,0 +1,841 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>볼펜 에디터</title>
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('pen_theme')||'light'}catch(e){document.documentElement.dataset.theme='light'}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" crossorigin="anonymous" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700&family=Nanum+Gothic:wght@700&family=Nanum+Pen+Script&family=Jua&family=Noto+Emoji&display=swap">
+<style>
+/* 인쇄용 글씨체(웹폰트) */
+@font-face{font-family:'Cafe24 Dongdong';src:url('https://cdn.jsdelivr.net/gh/fonts-archive/Cafe24Dongdong/Cafe24Dongdong.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'Cafe24 Ssurround';src:url('https://cdn.jsdelivr.net/gh/fonts-archive/Cafe24Ssurround/Cafe24Ssurround.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'Hakgyoansim Bombanghak';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2307-2@1.0/HakgyoansimBombanghakR.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'Ttangs Budaejjigae';src:url('https://cdn.jsdelivr.net/gh/fonts-archive/TtangsBudaeJjigae/TtangsBudaeJjigae-Medium.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'Cafe24 Decoshadow';src:url('https://cdn.jsdelivr.net/gh/fonts-archive/Cafe24Decoshadow/Cafe24Decoshadow.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'Chosun Sm';src:url('https://cdn.jsdelivr.net/gh/fonts-archive/ChosunSm/ChosunSm.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'Pretendard';src:url('https://cdn.jsdelivr.net/gh/fonts-archive/Pretendard/Pretendard-SemiBold.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'Paperlogy';src:url('https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/Paperlogy-6SemiBold.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'Gmarket Sans';src:url('https://cdn.jsdelivr.net/gh/fonts-archive/GmarketSans/GmarketSansMedium.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'NanumSquare Neo';src:url('https://cdn.jsdelivr.net/gh/fonts-archive/NanumSquareNeo/NanumSquareNeoB.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'Moneygraphy Rounded';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2411-2@1.0/Moneygraphy-Rounded.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'Jalnan';src:url('https://cdn.jsdelivr.net/gh/fonts-archive/Jalnan/Jalnan.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'MaruBuri';src:url('https://cdn.jsdelivr.net/gh/fonts-archive/MaruBuri/MaruBuri-SemiBold.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'Kyobo Handwriting 2024';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2507-1@1.0/KyoboHandwriting2024psw.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'Kyobo Handwriting 2020';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2112@1.0/KyoboHandwriting2020A.woff') format('woff');font-display:swap}
+@font-face{font-family:'Ownglyph ParkDaHyun';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2411-3@1.0/Ownglyph_ParkDaHyun.woff2') format('woff2');font-display:swap}
+/* 블랙 모드(기본 변수) */
+:root{color-scheme:dark;--bg:#15161a;--panel:#1e2026;--line:#30333c;--fg:#e8e9ee;--mut:#9a9eab;--acc:#ff4d8d;--acc2:#3ec5ff;--in:#282b33;--card:#2b2e38;--chip:rgba(255,77,141,.24);
+  --stage1:#2a2c35;--stage2:#15161a;--hovb:#555a68;--hov:#30343e;--selbg:#3a2530;
+  --okbg:#1d3327;--okfg:#7be0a4;--warnbg:#3b2a1a;--warnfg:#ffb866;--badbg:#3d1f24;--badfg:#ff8a8a;--pvbg:rgba(12,13,16,.97)}
+/* 화이트 모드: 밝은 베이지 배경 */
+:root[data-theme=light]{color-scheme:light;--bg:#f3ecdf;--panel:#fbf7ef;--line:#ddd1bc;--fg:#2b2622;--mut:#7c7265;--in:#ffffff;--card:#f1e8d8;--chip:rgba(255,77,141,.16);
+  --stage1:#f8f3e9;--stage2:#eadfcb;--hovb:#c2b49b;--hov:#f4ede0;--selbg:#ffe3ec;
+  --okbg:#dff3e6;--okfg:#1c7a44;--warnbg:#fdebd0;--warnfg:#9a5700;--badbg:#fde0e0;--badfg:#b02a2a;--pvbg:rgba(243,236,223,.98)}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font:13px/1.45 "Noto Sans KR","Malgun Gothic",sans-serif;display:flex;flex-direction:column;overflow:hidden}
+header{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--panel);border-bottom:1px solid var(--line);flex:none}
+header h1{font-size:15px;margin:0 12px 0 0;letter-spacing:-.02em}
+header h1 b{color:var(--acc)}
+.sp{flex:1}
+main{flex:1;display:flex;min-height:0}
+aside{width:292px;flex:none;background:var(--panel);overflow-y:auto;padding:14px 14px 14px}
+#left{border-right:1px solid var(--line)}
+#right{border-left:1px solid var(--line);width:300px}
+#center{flex:1;display:flex;flex-direction:column;min-width:0}
+#stage{flex:1;min-height:0;position:relative;overflow:hidden;background:radial-gradient(circle at 50% 40%,var(--stage1),var(--stage2) 75%)}
+#cv{position:absolute;left:0;top:0}
+#hint{position:absolute;left:0;right:0;bottom:8px;text-align:center;color:var(--mut);font-size:12px;pointer-events:none}
+#hint i{font-style:normal;display:inline-block;margin:0 8px}
+#hint .c1{color:var(--acc)}
+#strip{flex:none;height:122px;display:flex;background:var(--panel);border-top:1px solid var(--line)}
+#stripCtl{flex:none;width:224px;padding:8px 10px;border-right:1px solid var(--line)}
+#stripCtl .row{margin:0;flex-wrap:nowrap}
+#stripCtl .row button{padding:6px 4px}
+#penPos{font-weight:700;margin-bottom:6px}
+#thumbs{flex:1;display:flex;gap:6px;align-items:center;overflow-x:auto;overflow-y:hidden;padding:6px 10px}
+.thumb{flex:none;display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 8px 8px;border:2px solid transparent;border-radius:8px;cursor:pointer}
+.thumb:hover{background:var(--in)}
+.thumb.sel{border-color:var(--acc);background:var(--selbg)}
+.thumb canvas{display:block}
+.thumb span{font-size:11px;color:var(--mut)}
+h2{font-size:11px;letter-spacing:.08em;color:var(--mut);margin:0 0 9px;font-weight:700}
+h2 .n{display:inline-block;width:17px;height:17px;line-height:17px;border-radius:50%;background:var(--acc);color:#fff;text-align:center;letter-spacing:0;font-size:10.5px;margin-right:7px}
+h2 em{font-style:normal;letter-spacing:0;color:var(--fg);font-size:12px;margin-left:7px}
+aside h2:not(:first-child){margin-top:13px;padding-top:12px;border-top:1px solid var(--line)}
+button,select,input{font:inherit;color:inherit}
+button{background:var(--in);border:1px solid var(--line);border-radius:7px;padding:6px 10px;cursor:pointer;white-space:nowrap;touch-action:manipulation}
+button:hover{border-color:var(--hovb);background:var(--hov)}
+button.on:hover,button.pri:hover{background:var(--acc);border-color:var(--acc)}
+button:disabled{opacity:.35;cursor:default}
+button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
+button.pri:hover{filter:brightness(1.1)}
+.seg{display:inline-flex}
+.seg button{border-radius:0;margin-left:-1px}
+.seg button:first-child{border-radius:7px 0 0 7px;margin-left:0}
+.seg button:last-child{border-radius:0 7px 7px 0}
+.row{display:flex;gap:6px;margin-bottom:6px;align-items:center;flex-wrap:wrap}
+.row>*{flex:1;min-width:0}
+input[type=number],input[type=text]{background:var(--in);border:1px solid var(--line);border-radius:6px;padding:5px 7px;width:100%;color:var(--fg)}
+input[type=range]{width:100%;accent-color:var(--acc);margin:0}
+.full{width:100%;margin-bottom:12px}
+aside .seg button,aside button.full{padding:9px 10px}
+.dpi{font-size:12px;line-height:1.55;padding:7px 9px;border-radius:6px;background:var(--okbg);color:var(--okfg);margin:8px 0 0}
+.dpi.warn{background:var(--warnbg);color:var(--warnfg)}
+.dpi.bad{background:var(--badbg);color:var(--badfg)}
+.spec{font-size:11.5px;line-height:1.75;color:var(--mut);background:var(--in);border:1px solid var(--line);border-radius:7px;padding:9px 12px;margin:16px 0 0}
+.spec b{color:var(--fg);font-weight:700}
+small{color:var(--mut);display:block}
+/* 색상 고르기 */
+.sw{display:grid;grid-template-columns:repeat(8,1fr);gap:7px;margin-bottom:12px}
+.sw button{aspect-ratio:1;padding:0;min-height:0;border:1px solid var(--hovb);border-radius:50%;box-shadow:inset 0 -3px 5px rgba(0,0,0,.13)}
+.sw button:hover{border-color:var(--fg)}
+.sw button.on{outline:2.5px solid var(--acc);outline-offset:2px;border-color:var(--panel)}
+.sw.sq{grid-template-columns:repeat(10,1fr);gap:4px;margin-bottom:0}
+.sw.sq button{border-radius:5px;box-shadow:none}
+/* 스티커 고르기 */
+.h2row{display:flex;align-items:center}
+.seg.mini{margin-left:auto}
+.seg.mini button{padding:2px 7px!important;font-size:10.5px;letter-spacing:0;font-weight:500}
+#stkTabs{display:flex;margin-bottom:3px}
+#stkTabs button{flex:1;padding:4px 0!important;font-size:11px}
+.stk{display:grid;grid-template-columns:repeat(10,1fr);gap:2px;align-content:start;min-height:75px}
+.stk button{aspect-ratio:1;padding:0;min-height:0;border:none;background:transparent;border-radius:5px;font:400 15px/1 "Noto Emoji",sans-serif;display:flex;align-items:center;justify-content:center}
+.stk button:hover{background:var(--hov)}
+#txt{font-family:"Noto Sans KR","Malgun Gothic","Noto Emoji",sans-serif}
+.two{display:flex;gap:6px}
+.two .seg{flex:1;display:flex}
+.two .seg button{flex:1;padding:6px 2px!important;font-size:12px}
+.two>button{flex:1;padding:10px 4px!important;font-size:12.5px}
+/* 글씨체 고르기 */
+.fonts{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.fgrp{font-size:11px;color:var(--mut);margin:7px 0 4px}
+.fgrp:first-child{margin-top:0}
+.fonts button{padding:6px 2px;font-size:13px;line-height:1.25;overflow:hidden;text-overflow:ellipsis}
+#txt{font-size:15px;padding:9px 10px}
+#posSeg{display:flex}
+#posSeg button{flex:1}
+#posNote{margin-top:6px;font-size:11px}
+#applyAll{margin:0}
+.qty{display:flex;align-items:center;gap:5px;margin-bottom:6px}
+.qty button{padding:4px 10px}
+.qty input[type=number]{width:66px;text-align:center}
+#pvBtn{margin-bottom:0}
+#saveBox{margin-top:0;border-radius:14px;padding:12px 12px 12px;background:var(--card)}
+#saveBox .saveT{font-size:15px;font-weight:700;margin-bottom:10px}
+#saveBtn{display:flex;align-items:center;gap:12px;text-align:left;margin:0!important;padding:15px 14px!important;border-radius:12px}
+#saveBtn svg{flex:none;width:30px;height:30px}
+#saveBtn .tx{display:flex;flex-direction:column;gap:3px;min-width:0}
+#saveBtn b{font-size:19px;font-weight:700;line-height:1.2}
+#saveBtn i{font-style:normal;font-size:10.5px;font-weight:400;opacity:.92}
+.ico{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#okDlg{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:16px}
+#okDlg[hidden]{display:none}
+#okDlg .box{background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--acc);border-radius:14px;padding:22px 20px 16px;width:100%;max-width:360px}
+#okDlg .saveT{font-size:16px;font-weight:700;margin-bottom:18px}
+#okDlg label.f{display:block;font-size:12px;font-weight:700;color:var(--fg);margin-bottom:16px}
+#okDlg label.f em{font-style:normal;font-weight:400;font-size:11px;color:var(--acc)}
+#okDlg label.f input{display:block;margin-top:7px;padding:9px 10px;font-weight:400}
+#okDlg small{display:block;text-align:center;margin:8px 0 0}
+#total{font-size:12px;color:var(--mut);text-align:center;margin:2px 0 12px}
+#total:empty{display:none}
+#expStatus{font-size:12px;color:var(--acc);margin:0 0 12px;text-align:center;line-height:1.6}
+#expStatus:empty{display:none}
+#inapp{background:var(--warnbg);color:var(--warnfg);padding:8px 12px;font-size:13px;line-height:1.6}
+#inapp button{padding:3px 8px;min-height:0;margin-left:4px}
+#done{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:16px}
+#done[hidden]{display:none}
+#done .box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;width:100%;max-width:360px}
+#doneName{color:var(--mut);font-size:12px;margin:6px 0 12px;word-break:break-all}
+#pv{position:fixed;inset:0;z-index:20;background:var(--pvbg);display:flex;flex-direction:column}
+#pv[hidden]{display:none}
+#pvBar{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:var(--panel);border-bottom:1px solid var(--line)}
+#pvSum{color:var(--mut);margin-left:6px}
+#pvBody{flex:1;overflow:auto}
+#pvConfirm{max-width:780px;margin:10px auto 48px;padding:0 16px;text-align:center}
+#pvConfirm[hidden]{display:none}
+#pvNotice{text-align:left;white-space:pre-line;word-break:keep-all;font-size:13px;line-height:1.85;color:var(--fg);background:var(--in);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:18px}
+#pvOk{padding:16px 56px;font-size:18px;font-weight:800;letter-spacing:.04em;border-radius:12px}
+#pvGrid{display:flex;flex-direction:column;align-items:center;gap:14px;padding:16px}
+.pvCell{border:1px solid #ff9d2e;border-radius:12px;padding:10px 12px 12px;background:var(--panel);cursor:pointer;max-width:100%}
+.pvCell h3{font-size:13px;margin:0 0 8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pvCell h3 em{font-style:normal;font-weight:400;color:var(--warnfg);font-size:11px}
+.pvCell canvas{display:block;max-width:100%}
+.pvEmpty{color:var(--mut);padding:40px 10px;text-align:center;width:100%}
+/* 휴대폰·좁은 화면: 위에서 아래로 한 줄 배치, 페이지 전체가 스크롤 */
+@media (max-width:820px){
+  html,body{height:auto;min-height:100%}
+  body{overflow:visible;display:block}
+  header{flex-wrap:wrap;gap:6px;padding:6px 8px;position:sticky;top:0;z-index:5}
+  .sp,.pc{display:none}
+  header h1{flex-basis:100%;margin:0;font-size:14px}
+  header button{padding:7px 9px}
+  main{display:flex;flex-direction:column}
+  #center{display:block;order:1;flex:none}
+  #left{order:2}
+  #right{order:3}
+  #stage{height:46vh;min-height:280px}
+  aside,#right{width:auto;border:none;border-top:1px solid var(--line);overflow:visible}
+  #strip{display:block;height:auto}
+  #stripCtl{width:auto;border-right:none;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  #penPos,.qty{margin:0}
+  #stripCtl .row{flex:1;min-width:190px}
+  #thumbs{height:92px}
+  button,input[type=number],input[type=text]{min-height:40px}
+  input[type=number],input[type=text]{font-size:16px}
+  .sw{gap:9px}
+  .sw button{min-height:0}
+}
+</style>
+</head>
+<body>
+<div id="inapp" hidden>앱 안의 화면에서는 파일 저장이 안 될 수 있습니다. 크롬이나 사파리에서 열어 주세요.
+  <button id="inappBtn" hidden>기본 브라우저로 열기</button> <button id="inappCopy">주소 복사</button></div>
+<header>
+  <h1><b>볼펜</b> 에디터</h1>
+  <button id="undo" title="Ctrl+Z">↶ 실행 취소</button>
+  <button id="redo" title="Ctrl+Y">↷ 다시 실행</button>
+  <div class="sp"></div>
+  <div class="seg" id="themeSeg" title="작업 화면 색"><button data-t="light">화이트</button><button data-t="dark">블랙</button></div>
+  <button id="tgGuide" class="on">가이드선</button>
+  <button id="tgPrev" class="pri" title="전체 볼펜이 어떻게 나오는지 보기">전체 미리보기</button>
+</header>
+<main>
+<aside id="left">
+  <h2><b class="n">1</b>볼펜 색상<em id="penName"></em></h2>
+  <div class="sw" id="penSw"></div>
+
+  <h2><b class="n">2</b>인쇄 문구<em id="txtCnt"></em></h2>
+  <input type="text" id="txt" maxlength="30" placeholder="예 : 사랑은 언제나 오래참고" autocomplete="off">
+  <div class="dpi" id="fitInfo"></div>
+
+  <h2><b class="n">3</b>인쇄 위치</h2>
+  <div class="seg" id="posSeg"></div>
+  <small id="posNote">점선(가로 100 × 세로 4mm) 안에서 앞 = 펜촉 쪽 · 뒤 = 클립 쪽</small>
+
+  <h2><b class="n">4</b>글자 크기<em id="sizeV"></em></h2>
+  <input type="range" id="size" min="2" max="4" step="0.1">
+
+  <h2><b class="n">5</b>글씨 색<em id="txtName"></em></h2>
+  <div class="sw sq" id="txtSw"></div>
+</aside>
+
+<section id="center">
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <div id="hint"></div>
+  </div>
+  <div id="strip">
+    <div id="stripCtl">
+      <div id="penPos"></div>
+      <div class="qty" title="이 볼펜을 몇 개 제작할지"><span>수량</span><button id="qMinus">−</button><input type="number" id="qty" min="1" max="99999" value="1" inputmode="numeric"><button id="qPlus">＋</button><span>개</span></div>
+      <div class="row"><button id="cAdd">+ 볼펜</button><button id="cDel">삭제</button><button id="cLeft" title="순서를 앞으로">◀</button><button id="cRight" title="순서를 뒤로">▶</button></div>
+    </div>
+    <div id="thumbs"></div>
+  </div>
+</section>
+
+<aside id="right">
+  <h2><b class="n">6</b>글씨체<em id="fontName"></em></h2>
+  <div id="fontSeg">
+    <div class="fgrp">기존 글씨체</div>
+    <div class="fonts" id="fontOld"></div>
+    <div class="fgrp">새 글씨체</div>
+    <div class="fonts" id="fontNew"></div>
+  </div>
+
+  <h2 class="h2row"><b class="n">7</b>스티커<span class="seg mini" id="scolSeg" title="스티커 색"><button data-v="own">원래 색</button><button data-v="text">글씨 색</button></span></h2>
+  <div class="seg" id="stkTabs"></div>
+  <div class="stk" id="stkGrid"></div>
+
+  <h2><b class="n">8</b>다른 색 볼펜</h2>
+  <div class="two"><button id="addPen" class="pri" title="지금 볼펜을 복사해 추가합니다. 색만 바꾸면 됩니다">＋ 다른 색 볼펜 추가</button><button id="applyAll" title="이 문구(스티커 포함)·글씨체·위치를 모든 볼펜에 적용">모든 볼펜에 적용</button></div>
+
+  <h2><b class="n">9</b>저장 · 시안 확정<em id="sum"></em></h2>
+  <button class="pri full" id="saveBtn"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M4.5 17.5V19a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5v-1.5"/></svg><span class="tx"><b>저장하기</b><i>미리보기 확인 후 시안 확정하기</i></span></button>
+</aside>
+</main>
+
+<div id="done" hidden><div class="box">
+  <b>파일이 준비됐습니다</b>
+  <div id="doneName"></div>
+  <button class="pri full" id="doneSave">파일 저장</button>
+  <button class="full" id="doneShare" hidden>공유하기 (카톡·메일 등)</button>
+  <small>저장한 ZIP 파일을 주문하신 곳으로 보내 주세요.</small>
+  <button class="full" id="doneClose" style="margin-top:8px">닫기</button>
+</div></div>
+
+<div id="pv" hidden>
+  <div id="pvBar"><div><b>전체 미리보기</b> <span id="pvSum"></span></div><button id="pvClose" class="pri">닫기 ✕</button></div>
+  <div id="pvBody">
+    <div id="pvGrid"></div>
+    <div id="pvConfirm">
+      <div id="pvNotice">안녕하세요 고객님^^
+제품 시안 담당자입니다
+볼펜 옆면 한쪽에 아래 시안의 문구·글씨체·색상·위치로 인쇄됩니다.
+화면의 이미지는 대략적인 위치나 감도를 보기 위한 것이며
+실제 제작 시 나타나는 정확한 색상 차이를 반영하지는 않습니다.
+++ 시안 확정 전 해당 제품상세페이지 내에 있는 주문제작상품 안내사항을 숙지하시고,
+시안의 오타, 간격, 수량 등 확인 후 확정해 주시기 바랍니다.
+시안 작업 이후에는 취소/환불이 불가능합니다.</div>
+      <button class="pri" id="pvOk">제작확정</button>
+    </div>
+  </div>
+</div>
+
+<div id="okDlg" hidden><div class="box">
+  <div class="saveT">제작확정</div>
+  <label class="f">주문자명 <em>(필수)</em><input type="text" id="oname" maxlength="20" placeholder="주문하신 분 성함" autocomplete="name"></label>
+  <label class="f">주문번호 <em>(필수)</em><input type="text" id="ono" maxlength="30" placeholder="쇼핑몰 주문번호" inputmode="numeric"></label>
+  <div id="total"></div>
+  <div id="expStatus"></div>
+  <button class="pri full" id="expAll">확인</button>
+  <button class="full" id="okClose" style="margin-top:8px">닫기</button>
+  <small>확인을 누르면 제작용 파일(ZIP)이 저장됩니다.</small>
+</div></div>
+
+<script>
+// 새 버전이 올라왔는데 브라우저가 옛 화면을 기억하고 있으면, 열자마자 한 번 새로 받아 온다
+(()=>{if(!/^https?:$/.test(location.protocol))return;
+  fetch(location.pathname,{method:'HEAD',cache:'no-store'}).then(r=>{const lm=Date.parse(r.headers.get('last-modified')||''),cur=Date.parse(document.lastModified);
+    if(!lm||!cur||lm-cur<3000)return;const key='pen_ver_'+lm;try{if(sessionStorage.getItem(key))return;sessionStorage.setItem(key,'1')}catch{return}
+    location.replace(location.pathname+'?v='+lm)}).catch(()=>{})})();
+
+/* ================= 상품 설정: 판매 옵션이 바뀌면 이 묶음만 고치면 된다 ================= */
+// 볼펜 색상 16종 (상세페이지 대표 사진 순서. ko = 화면·주문서에 나오는 이름, hex = 화면에 보이는 색)
+const PEN_COLORS=[
+  {id:'red',ko:'레드',hex:'#c82525'},
+  {id:'orange',ko:'오렌지',hex:'#f9760f'},
+  {id:'yellow',ko:'옐로우',hex:'#fde600'},
+  {id:'green',ko:'그린',hex:'#7fe041'},
+  {id:'blue',ko:'블루',hex:'#3ebaf4'},
+  {id:'navy',ko:'네이비',hex:'#264080'},
+  {id:'purple',ko:'퍼플',hex:'#7e57c7'},
+  {id:'pink',ko:'핑크',hex:'#f44fbd'},
+  {id:'black',ko:'블랙',hex:'#2a2d28'},
+  {id:'ppink',ko:'파스텔핑크',hex:'#f9cfdc'},
+  {id:'pyellow',ko:'파스텔옐로우',hex:'#fbf3a0'},
+  {id:'pgreen',ko:'파스텔그린',hex:'#b5f0d2'},
+  {id:'mint',ko:'파스텔민트',hex:'#bdeeee'},
+  {id:'pblue',ko:'파스텔블루',hex:'#a9cdf3'},
+  {id:'ppurple',ko:'파스텔퍼플',hex:'#dcc4ee'},
+  {id:'white',ko:'화이트',hex:'#f7f6f4'}];
+// 글씨 색: 색 계열 10가지 × 5단계(진한 → 파스텔) = 50색, 그 아래 그라데이션 10종. 화면 한 줄 = 10칸, no = 주문서에 찍히는 번호
+const WHITE='#fffffa'; // 완전한 흰색은 쓰지 않는다. 화이트 = 옐로우 2% (C0 M0 Y2 K0)
+const HUES=[
+  {ko:'그레이',c:['#111111','#4a4a4a','#8a8a8a','#c4c4c4',WHITE],names:['블랙','차콜','그레이','라이트그레이','화이트']},
+  {ko:'레드',c:['#7f1d1d','#c81e1e','#ef4444','#f87171','#fecaca']},
+  {ko:'핑크',c:['#9d174d','#db2777','#f472b6','#f9a8d4','#fce7f3']},
+  {ko:'오렌지',c:['#9a3412','#ea580c','#fb923c','#fdba74','#ffedd5']},
+  {ko:'옐로우',c:['#a16207','#eab308','#facc15','#fde047','#fef9c3']},
+  {ko:'그린',c:['#14532d','#16a34a','#4ade80','#86efac','#dcfce7']},
+  {ko:'민트',c:['#134e4a','#0d9488','#2dd4bf','#5eead4','#ccfbf1']},
+  {ko:'블루',c:['#1e3a8a','#2563eb','#60a5fa','#93c5fd','#dbeafe']},
+  {ko:'퍼플',c:['#4c1d95','#7c3aed','#a78bfa','#c4b5fd','#ede9fe']},
+  {ko:'브라운',c:['#5b3a1e','#8b5a2b','#b08050','#d2b48c','#efe1cc']}];
+const SHADES=['진한 ','','밝은 ','연한 ','파스텔 '];
+// 그라데이션(문구의 왼쪽 끝 → 오른쪽 끝으로 색이 바뀐다). g = 지나가는 색들
+const GRADS=[
+  {ko:'솜사탕',g:['#ff9ecf','#9ad8ff']},
+  {ko:'유니콘',g:['#ff9ecf','#c4a5ff','#9ad8ff']},
+  {ko:'복숭아',g:['#ff9a9e','#fecfef']},
+  {ko:'선셋',g:['#ff5f6d','#ffc371']},
+  {ko:'레몬민트',g:['#f9f586','#84fab0']},
+  {ko:'오로라',g:['#5ee7df','#b490ca']},
+  {ko:'오션',g:['#2193b0','#6dd5ed']},
+  {ko:'라벤더',g:['#a18cd1','#fbc2eb']},
+  {ko:'레인보우',g:['#ff4d4d','#ff9f1c','#ffd600','#3ccf4e','#2d9cff','#9b5cff']},
+  {ko:'골드빛',g:['#b8860b','#ffe08a','#b8860b']}];
+const TEXT_COLORS=[];
+SHADES.forEach((sh,r)=>HUES.forEach((h,i)=>TEXT_COLORS.push({id:'c'+(r*10+i+1),no:r*10+i+1,ko:h.names?h.names[r]:sh+h.ko,hex:h.c[r]})));
+GRADS.forEach((g,i)=>TEXT_COLORS.push({id:'g'+(i+1),no:51+i,ko:g.ko+' 그라데이션',hex:g.g[g.g.length>>1],grad:g.g}));
+// 글씨체: 기존 8종(g:'old')을 먼저, 새로 고른 10종(g:'new')을 아래에. fam = 웹폰트 이름, w = 굵기, label = 버튼에 보이는 글자
+// 추가하려면 맨 위 @font-face(또는 구글 폰트 주소)에도 넣어야 한다
+const FONTS=[
+  {g:'old',id:'gothic',ko:'나눔고딕',fam:'Nanum Gothic',w:700},
+  {g:'old',id:'pen',ko:'나눔손글씨',fam:'Nanum Pen Script',w:400,label:'나눔손글씨'},
+  {g:'old',id:'dongdong',ko:'Cafe24 동동체',fam:'Cafe24 Dongdong',w:400,label:'동동체'},
+  {g:'old',id:'ssurround',ko:'Cafe24 써라운드체',fam:'Cafe24 Ssurround',w:400,label:'써라운드체'},
+  {g:'old',id:'bom',ko:'학교안심 봄방학',fam:'Hakgyoansim Bombanghak',w:400,label:'봄방학'},
+  {g:'old',id:'ttangs',ko:'땅스부대찌개',fam:'Ttangs Budaejjigae',w:400,label:'부대찌개'},
+  {g:'old',id:'deco',ko:'Cafe24 데코쉐도우(영문)',fam:'Cafe24 Decoshadow',w:400,label:'DECO'},
+  {g:'old',id:'chosun',ko:'조선신명조',fam:'Chosun Sm',w:400},
+  {g:'new',id:'pretendard',ko:'프리텐다드',fam:'Pretendard',w:600},
+  {g:'new',id:'paperlogy',ko:'페이퍼로지',fam:'Paperlogy',w:600},
+  {g:'new',id:'gmarket',ko:'지마켓 산스',fam:'Gmarket Sans',w:500,label:'지마켓산스'},
+  {g:'new',id:'nsneo',ko:'나눔스퀘어 네오',fam:'NanumSquare Neo',w:700,label:'스퀘어네오'},
+  {g:'new',id:'moneygraphy',ko:'토스 머니그라피',fam:'Moneygraphy Rounded',w:400,label:'머니그라피'},
+  {g:'new',id:'jalnan',ko:'여기어때 잘난체',fam:'Jalnan',w:400,label:'잘난체'},
+  {g:'new',id:'jua',ko:'배민 주아',fam:'Jua',w:400,label:'주아체'},
+  {g:'new',id:'maruburi',ko:'마루 부리',fam:'MaruBuri',w:600,label:'마루부리'},
+  {g:'new',id:'kyobo1',ko:'교보 손글씨 1 (2024 박서우)',fam:'Kyobo Handwriting 2024',w:400,label:'교보손글씨1'},
+  {g:'new',id:'kyobo2',ko:'교보 손글씨 2 (2020 박도연)',fam:'Kyobo Handwriting 2020',w:400,label:'교보손글씨2'},
+  {g:'new',id:'parkdahyun',ko:'온글잎 박다현체',fam:'Ownglyph ParkDaHyun',w:400,label:'박다현체'}];
+// 볼펜 모양(mm, 펜촉이 왼쪽). 상세페이지 인쇄영역 도면의 비율 그대로이며, 전체 길이 L만 가정값(143mm)이다
+const PEN={L:143,R:4.95,tip:11.8,btn:134.4,btnR:2.9,clipX0:102.2,clipX1:130.5};
+// 인쇄 영역(화면의 점선): 가로 100 × 세로 4mm. 펜촉 끝에서 x0~x1, 세로 h. pad = 앞·뒤 맞춤일 때 영역 끝에서 띄우는 여백
+const ZONE={x0:23,x1:123,h:4,pad:0};ZONE.w=ZONE.x1-ZONE.x0-ZONE.pad*2; // w = 문구가 차지할 수 있는 최대 폭
+// 인쇄 위치 = 인쇄 영역 안에서의 맞춤 (도면: 중간맞춤 / 뒤쪽맞춤, 앞은 반대쪽 끝)
+const POS={front:{ko:'앞',al:'left'},mid:{ko:'중간',al:'center'},back:{ko:'뒤',al:'right'}};
+const SIZE={min:2,max:4,def:3.5,legible:2};
+const ST={s:.92}; // 스티커 크기 = 글자 크기 × s
+// 스티커: 문구 안에 글자처럼 들어간다(무료 글꼴 Noto Emoji의 한 가지 색 그림). c = 분류의 기본 '원래 색', 개별 색은 '그림:색'으로 적는다
+const STICKER_SETS=[
+  {ko:'하트·별',c:'#f472b6',list:'❤:#ef4444 🧡:#fb923c 💛:#facc15 💚:#22c55e 💙:#3b82f6 💜:#a855f7 🖤:#222222 💕 💖 💘 💝 ⭐:#fbbf24 🌟:#fbbf24 ✨:#fbbf24 ⚡:#facc15 🔥:#f97316 🎀 👑:#f5b400 💎:#38bdf8 🏆:#f5b400 🎉:#a855f7 🎈:#ef4444 🎁:#ef4444'},
+  {ko:'표정',c:'#f5b400',list:'😊 😄 😍 🥰 😉 😎 🥳 🤩 😂 😜 🤔 😭 🥺 👍:#e0a070 👏:#e0a070 🙏:#e0a070 ✌:#e0a070 💪:#e0a070'},
+  {ko:'동물',c:'#8b5a2b',list:'🐶 🐱 🐰:#f9a8d4 🐻 🐼:#222222 🐯:#f59e0b 🦊:#f97316 🐹 🐷:#f9a8d4 🐸:#22c55e 🐥:#facc15 🐧:#222222 🦄:#c084fc 🐝:#facc15 🦋:#60a5fa 🐢:#16a34a 🐬:#38bdf8 🐳:#38bdf8 🦖:#16a34a 🐾'},
+  {ko:'자연',c:'#22c55e',list:'🌸:#f9a8d4 🌷:#f472b6 🌹:#ef4444 🌻:#facc15 🌼:#facc15 🍀 🌿 🌱 🌳 🍁:#f97316 🌈:#a855f7 ☀:#f59e0b 🌙:#facc15 ☁:#93c5fd ❄:#60a5fa ☔:#3b82f6 🌊:#38bdf8 ⛄:#93c5fd 🌍:#3b82f6 💧:#38bdf8'},
+  {ko:'음식',c:'#f97316',list:'🍎:#ef4444 🍓:#ef4444 🍒:#ef4444 🍑:#fb923c 🍋:#facc15 🍊 🍉:#22c55e 🍇:#a855f7 🍔 🍕 🍩:#f472b6 🍪:#b45309 🎂:#f472b6 🍰:#f472b6 🧁:#f472b6 🍭:#f472b6 🍫:#78350f ☕:#78350f 🍦:#f9a8d4 🧋:#b45309'},
+  {ko:'사물',c:'#3b82f6',list:'📚 ✏:#f59e0b 📝 🎓:#222222 💯:#ef4444 ✅:#22c55e ❗:#ef4444 ❓:#ef4444 🎵:#a855f7 🎤 🎮 ⚽:#222222 🏀:#f97316 🎨:#f472b6 💡:#facc15 ⏰:#ef4444 🚀:#ef4444 ✈ 🏠:#f97316 💌:#f472b6'}];
+// 속이 꽉 찬 하트·별: 글꼴 그림 대신 직접 그린 도형을 쓴다(-1~1 상자 기준 SVG 경로)
+const HEART_D='M0 .95C-.25 .72-1 .25-1-.35C-1-.75-.7-.95-.45-.95C-.2-.95-.05-.8 0-.62C.05-.8 .2-.95 .45-.95C.7-.95 1-.75 1-.35C1 .25 .25 .72 0 .95Z';
+const STAR_D='M'+Array.from({length:10},(_,i)=>{const r=i%2?.47:1,a=-Math.PI/2+i*Math.PI/5;return(r*Math.cos(a)).toFixed(3)+' '+(r*Math.sin(a)+.05).toFixed(3)}).join('L')+'Z';
+const SOLID={'❤':HEART_D,'🧡':HEART_D,'💛':HEART_D,'💚':HEART_D,'💙':HEART_D,'💜':HEART_D,'🖤':HEART_D,'⭐':STAR_D};
+/* ======================================================================================= */
+
+const $=s=>document.querySelector(s);
+const cv=$('#cv'),ctx=cv.getContext('2d'),stage=$('#stage'),thumbsEl=$('#thumbs');
+const byId=a=>Object.fromEntries(a.map(x=>[x.id,x])),PENC=byId(PEN_COLORS),TXTC=byId(TEXT_COLORS),FONT=byId(FONTS);
+const penCol=p=>PENC[p.color]||PEN_COLORS[0],txtCol=p=>TXTC[p.tcolor]||TEXT_COLORS[0],fontOf=p=>FONT[p.font]||FONTS[0],posOf=p=>POS[p.pos]||POS.mid;
+const COARSE=matchMedia('(pointer:coarse)').matches;
+if(!CanvasRenderingContext2D.prototype.roundRect)CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){ // 구형 휴대폰 브라우저용
+  r=Math.max(0,Math.min(+r||0,w/2,h/2));this.moveTo(x+r,y);this.arcTo(x+w,y,x+w,y+h,r);this.arcTo(x+w,y+h,x,y+h,r);this.arcTo(x,y+h,x,y,r);this.arcTo(x,y,x+w,y,r);this.closePath()};
+let uidN=0;const uid=()=>'p'+Date.now().toString(36)+(uidN++).toString(36);
+const newPen=()=>({id:uid(),color:'mint',text:'',font:'gothic',tcolor:'c1',pos:'back',size:SIZE.def,scol:'own',qty:1});
+const qtyOf=p=>Math.min(99999,Math.max(1,Math.floor(+p.qty)||1));
+let state={pens:[newPen()]};
+let ci=0,showGuides=true,hist=[],hi=-1,stripSig='',busy=false;
+const pen=()=>state.pens[ci];
+const sigNow=()=>state.pens.map(p=>p.id).join('|');
+const isLight=()=>document.documentElement.dataset.theme==='light';
+
+/* ---------- 히스토리 ---------- */
+function commit(){hist=hist.slice(0,hi+1);hist.push(JSON.stringify({state,ci}));if(hist.length>80)hist.shift();hi=hist.length-1;histBtns();thumbCur()}
+function restore(){const s=JSON.parse(hist[hi]);state=s.state;ci=Math.min(s.ci,state.pens.length-1);stripSig='';refresh();histBtns()}
+function undo(){if(hi>0){hi--;restore()}}
+function redo(){if(hi<hist.length-1){hi++;restore()}}
+function histBtns(){$('#undo').disabled=hi<=0;$('#redo').disabled=hi>=hist.length-1}
+let lazyT;const lazyCommit=()=>{clearTimeout(lazyT);lazyT=setTimeout(commit,400)};
+
+/* ---------- 글자 ---------- */
+const fontCss=(f,px)=>`${f.w} ${px}px "${f.fam}","Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",sans-serif`;
+const mcx=document.createElement('canvas').getContext('2d');
+/* ---------- 스티커: 문구 속 그림 글자를 따로 떼어 내어 Noto Emoji 글꼴과 스티커 색으로 그린다 ---------- */
+let EMO_RE;try{EMO_RE=new RegExp('\\p{Extended_Pictographic}(?:\\uFE0F|\\u200D\\p{Extended_Pictographic}|[\\u{1F3FB}-\\u{1F3FF}])*','gu')}catch{EMO_RE=/[\u2190-\u2BFF\u{1F000}-\u{1FAFF}]\uFE0F?/gu}
+const STKC={}; // 그림 → 원래 색
+for(const set of STICKER_SETS){set.items=set.list.split(' ').map(t=>{const [ch,c]=t.split(':');STKC[ch]=c||set.c;return{ch,c:c||set.c}})}
+const STKV=Object.fromEntries(Object.entries(SOLID).map(([ch,d])=>[ch,{d,path:new Path2D(d)}])),VW=1.12; // 직접 그리는 스티커 · 그 스티커가 차지하는 폭(스티커 크기 × VW)
+const emoKey=t=>t.replace(/️/g,'');
+const emoCss=px=>`400 ${px*ST.s}px "Noto Emoji"`;
+function runsOf(text){const out=[];let i=0;for(const m of text.matchAll(EMO_RE)){if(m.index>i)out.push({t:text.slice(i,m.index)});out.push({t:m[0],e:1});i=m.index+m[0].length}
+  if(i<text.length)out.push({t:text.slice(i)});return out} // 문구를 [글자 묶음, 스티커, 글자 묶음…]으로 나눈다
+const hasSticker=p=>runsOf(p.text).some(r=>r.e);
+function textW(p,size){let w=0;for(const r of runsOf(p.text)){if(r.e&&STKV[emoKey(r.t)]){w+=100*ST.s*VW;continue}mcx.font=r.e?emoCss(100):fontCss(fontOf(p),100);w+=mcx.measureText(r.t).width}return w/100*size} // 문구(스티커 포함)의 가로 폭(mm)
+function effSize(p){const w=textW(p,p.size);return w>ZONE.w?p.size*ZONE.w/w:p.size} // 인쇄 영역을 넘으면 영역 폭에 맞게 줄인 크기
+const hasText=p=>!!p.text.trim();
+const tname=p=>{const c=txtCol(p);return`${c.no}번 ${c.ko}`}; // 글씨 색 이름: '14번 옐로우'
+// 문구의 가운데 x(mm): 앞 = 영역 왼쪽 끝부터, 중간 = 영역 가운데, 뒤 = 영역 오른쪽 끝에 맞춤
+function textCx(p){const w=hasText(p)?textW(p,effSize(p)):24,al=posOf(p).al;
+  return al==='left'?ZONE.x0+ZONE.pad+w/2:al==='right'?ZONE.x1-ZONE.pad-w/2:(ZONE.x0+ZONE.x1)/2}
+function ensureFont(p){try{document.fonts.load(fontCss(fontOf(p),20),p.text||'가').catch(()=>{});if(hasSticker(p))document.fonts.load(emoCss(20),p.text).catch(()=>{})}catch{}} // 웹폰트는 쓰는 글자 조각만 받아 온다
+const lum=hex=>{const n=parseInt(hex.slice(1),16);return(.299*(n>>16&255)+.587*(n>>8&255)+.114*(n&255))/255};
+const lowContrast=p=>Math.abs(lum(penCol(p).hex)-lum(txtCol(p).hex))<.25;
+function shade(hex,a){const n=parseInt(hex.slice(1),16),t=a<0?0:255,m=Math.abs(a),ch=s=>Math.round((n>>s&255)*(1-m)+t*m);return`rgb(${ch(16)},${ch(8)},${ch(0)})`}
+
+/* ---------- 그리기 ---------- */
+// 좌표는 mm. 원점 = 펜촉 끝(왼쪽)의 몸통 중심선
+function bodyPath(c){const {L,R,tip,btn,btnR}=PEN;c.beginPath();
+  c.moveTo(.5,-2);c.lineTo(tip,-R);c.lineTo(btn,-R);c.lineTo(btn,-btnR);c.lineTo(L-1.3,-btnR);c.quadraticCurveTo(L,-btnR,L,-btnR+1.3);
+  c.lineTo(L,btnR-1.3);c.quadraticCurveTo(L,btnR,L-1.3,btnR);c.lineTo(btn,btnR);c.lineTo(btn,R);c.lineTo(tip,R);c.lineTo(.5,2);c.quadraticCurveTo(0,0,.5,-2);c.closePath()}
+// 글씨 색 칠하기: 단색은 그대로, 그라데이션은 문구의 왼쪽 위 → 오른쪽 아래로(45° 대각선) 색이 바뀐다. x,cy,w,h = 문구가 차지하는 상자(화면 좌표)
+function paintOf(c,col,x,cy,w,h){if(!col.grad)return col.hex;const d=(w+h)/2,g=c.createLinearGradient(x,cy-h/2,x+d,cy-h/2+d);col.grad.forEach((v,i)=>g.addColorStop(i/(col.grad.length-1),v));return g}
+const cssOf=col=>col.grad?`linear-gradient(135deg,${col.grad.join(',')})`:col.hex;
+function drawText(c,k,ox,oy,p){if(!hasText(p))return;const s=effSize(p),px=s*k,bw=textW(p,s)*k,x0=ox+textCx(p)*k-bw/2;
+  c.save();c.textAlign='left';c.textBaseline='middle';const paint=paintOf(c,txtCol(p),x0,oy,bw,px);let x=x0;
+  for(const r of runsOf(p.text)){const key=emoKey(r.t),own=r.e&&p.scol!=='text'&&STKC[key],v=r.e&&STKV[key];c.fillStyle=own||paint;
+    if(v){const adv=px*ST.s*VW,q=px*ST.s*.46,P=new Path2D();P.addPath(v.path,new DOMMatrix([q,0,0,q,x+adv/2,oy]));c.fill(P);x+=adv;continue}
+    c.font=r.e?emoCss(px):fontCss(fontOf(p),px);c.fillText(r.t,x,oy+px*.04);x+=c.measureText(r.t).width}
+  c.restore()}
+function drawPen(c,k,ox,oy,p,o={}){const B=penCol(p).hex,{L,R,tip,btn,clipX0,clipX1}=PEN,edge='rgba(0,0,0,.3)';
+  c.save();c.translate(ox,oy);c.scale(k,k);c.lineWidth=1/k;c.lineJoin='round';
+  // 클립(몸통 위쪽)
+  c.fillStyle=shade(B,-.13);c.strokeStyle=edge;
+  c.beginPath();c.rect(clipX1-7,-R-2,7,2.5);c.fill();c.stroke();
+  c.beginPath();c.roundRect(clipX0,-R-3.7,clipX1-clipX0,2,.6);c.fill();c.stroke();
+  // 몸통
+  c.save();if(o.shadow){c.shadowColor=isLight()?'rgba(70,50,20,.3)':'rgba(0,0,0,.6)';c.shadowBlur=22;c.shadowOffsetY=9}
+  c.fillStyle=B;bodyPath(c);c.fill();c.restore();
+  c.save();bodyPath(c);c.clip();
+  c.fillStyle=shade(B,.13);c.fillRect(0,-R,tip,R*2);              // 펜촉 원뿔: 조금 밝게
+  c.fillStyle=shade(B,-.07);c.fillRect(btn,-R,L-btn,R*2);         // 노크 버튼: 조금 어둡게
+  const g=c.createLinearGradient(0,-R,0,R);g.addColorStop(0,'rgba(255,255,255,.26)');g.addColorStop(.3,'rgba(255,255,255,.07)');g.addColorStop(.6,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.2)');
+  c.fillStyle=g;c.fillRect(0,-R,L,R*2);                           // 원통의 둥근 느낌
+  c.fillStyle='rgba(0,0,0,.22)';c.fillRect(tip-.12,-R,.24,R*2);c.fillRect(btn-.12,-R,.24,R*2); // 이음매
+  c.restore();
+  c.strokeStyle=edge;bodyPath(c);c.stroke();
+  c.restore();
+  drawText(c,k,ox,oy,p)}
+function zoneRect(c,k,ox,oy){c.save();c.strokeStyle='#ff2d78';c.lineWidth=1.25;c.setLineDash([5,4]);
+  c.strokeRect(ox+ZONE.x0*k,oy-ZONE.h/2*k,(ZONE.x1-ZONE.x0)*k,ZONE.h*k);c.restore()}
+// 인쇄 부분 확대 창: 인쇄 위치를 가운데에 두고 크게 보여 준다
+const ZH=PEN.R*2+6,PH=PEN.R*2+4;
+const zwOf=p=>Math.max(62,Math.min(PEN.L,(hasText(p)?textW(p,effSize(p)):0)+18)); // 확대 창의 가로 범위(mm): 문구가 길면 넓힌다 // 확대 창이 보여 주는 범위(mm) · 볼펜 한 자루가 차지하는 높이(mm)
+function drawZoom(c,p,x,y,w,h,zk,o={}){const ox=x+w/2-textCx(p)*zk,oy=y+h/2;
+  c.save();c.beginPath();c.roundRect(x,y,w,h,14);c.fillStyle=isLight()?'rgba(255,255,255,.6)':'rgba(255,255,255,.07)';c.fill();c.clip();
+  drawPen(c,zk,ox,oy,p);
+  if(o.ghost&&!hasText(p)){c.fillStyle=lum(penCol(p).hex)>.5?'rgba(0,0,0,.42)':'rgba(255,255,255,.6)';c.font='500 '+Math.max(11,Math.min(15,zk*1.4))+'px "Noto Sans KR","Malgun Gothic",sans-serif';
+    c.textAlign='center';c.textBaseline='middle';c.fillText('왼쪽에서 문구를 입력해 주세요',x+w/2,oy)}
+  if(o.guides){zoneRect(c,zk,ox,oy);c.fillStyle='#ff2d78';c.font='11px "Noto Sans KR","Malgun Gothic",sans-serif';c.textAlign='right';c.textBaseline='alphabetic';
+    c.fillText(`┅ 인쇄 가능 영역 ${ZONE.x1-ZONE.x0}×${ZONE.h}mm`,x+w-10,y+h-8)}
+  c.restore();
+  c.save();c.strokeStyle=isLight()?'rgba(120,100,70,.35)':'rgba(255,255,255,.16)';c.lineWidth=1;c.beginPath();c.roundRect(x+.5,y+.5,w-1,h-1,14);c.stroke();c.restore()}
+function layout(){const r=stage.getBoundingClientRect(),cw=r.width,ch=r.height,nar=cw<500,ZW=zwOf(pen());
+  const k=Math.max(1.5,Math.min((cw-(nar?24:90))/PEN.L,8));
+  const zk=Math.max(3,Math.min((cw-(nar?24:140))/ZW,ch*.46/ZH,15));
+  const ph=PH*k,zw=ZW*zk,zh=ZH*zk,gap=nar?44:60,top=Math.max(8,(ch-ph-gap-zh)/2-10);
+  return{k,ox:(cw-PEN.L*k)/2,oy:top+(PH-PEN.R)*k,zk,zx:(cw-zw)/2,zy:top+ph+gap,zw,zh,cw,ch}}
+function render(){const v=layout(),dpr=window.devicePixelRatio||1,pw=Math.round(v.cw*dpr),ph=Math.round(v.ch*dpr),p=pen();
+  if(cv.width!==pw||cv.height!==ph){cv.width=pw;cv.height=ph;cv.style.width=v.cw+'px';cv.style.height=v.ch+'px'}
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,v.cw,v.ch);
+  drawPen(ctx,v.k,v.ox,v.oy,p,{shadow:true});
+  if(showGuides)zoneRect(ctx,v.k,v.ox,v.oy);
+  ctx.fillStyle=isLight()?'#7c7265':'#9a9eab';ctx.font='700 12px "Noto Sans KR","Malgun Gothic",sans-serif';ctx.textAlign='center';ctx.textBaseline='alphabetic';
+  ctx.fillText(`인쇄 부분 확대 · ${posOf(p).ko}`,v.cw/2,v.zy-10);
+  drawZoom(ctx,p,v.zx,v.zy,v.zw,v.zh,v.zk,{ghost:true,guides:showGuides})}
+
+/* ---------- 볼펜(여러 종) ---------- */
+function selectPen(i){if(i<0||i>=state.pens.length||i===ci)return;ci=i;refresh()}
+function addPen(){const n={...pen(),id:uid()};state.pens.splice(ci+1,0,n);ci++;commit();refresh()} // 문구·글씨체·위치는 그대로 이어받고 색만 바꾸면 된다
+function delPen(){if(state.pens.length===1)state.pens[0]=newPen();else{state.pens.splice(ci,1);ci=Math.min(ci,state.pens.length-1)}commit();refresh()}
+function movePen(d){const j=ci+d,a=state.pens;if(j<0||j>=a.length)return;[a[ci],a[j]]=[a[j],a[ci]];ci=j;commit();refresh()}
+function drawThumb(el,p){const w=170,k=w/(PEN.L+4),h=(PH+1)*k,dpr=2;
+  el.width=Math.round(w*dpr);el.height=Math.round(h*dpr);el.style.width=w+'px';el.style.height=h+'px';
+  drawPen(el.getContext('2d'),k*dpr,2*k*dpr,(PH-PEN.R+.5)*k*dpr,p)}
+function thumbCur(){const el=thumbsEl.children[ci];if(el&&stripSig===sigNow())drawThumb(el.firstChild,pen())}
+function syncStrip(){const sig=sigNow();
+  if(sig!==stripSig){stripSig=sig;
+    thumbsEl.innerHTML=state.pens.map((p,i)=>`<div class="thumb" data-i="${i}"><canvas></canvas><span></span></div>`).join('');
+    state.pens.forEach((p,i)=>drawThumb(thumbsEl.children[i].firstChild,p))}
+  else thumbCur();
+  [...thumbsEl.children].forEach((el,i)=>{const p=state.pens[i];el.classList.toggle('sel',i===ci);el.lastChild.textContent=`${i+1}번 · ${penCol(p).ko} · ${qtyOf(p)}개`});
+  const el=thumbsEl.children[ci];if(el)thumbsEl.scrollLeft=Math.max(0,el.offsetLeft-thumbsEl.offsetLeft-(thumbsEl.clientWidth-el.offsetWidth)/2);
+  $('#penPos').textContent=`볼펜 ${ci+1} / 총 ${state.pens.length}종`;$('#cLeft').disabled=ci===0;$('#cRight').disabled=ci===state.pens.length-1;
+  const q=$('#qty');if(q!==document.activeElement)q.value=qtyOf(pen())}
+function setQty(v){const q=Math.min(99999,Math.max(1,Math.floor(+v)||1));if(q===pen().qty)return refresh();pen().qty=q;commit();refresh()}
+
+/* ---------- UI ---------- */
+function totals(){let kinds=0,total=0; // 문구가 있는 볼펜만 센다
+  for(const p of state.pens){if(!hasText(p))continue;kinds++;total+=qtyOf(p)}return{kinds,total}}
+const sumText=t=>`${t.kinds}종 · 총 ${t.total}개`;
+function syncUI(){const p=pen(),on=(sel,key,val)=>document.querySelectorAll(sel+' button').forEach(b=>b.classList.toggle('on',b.dataset[key]===val));
+  on('#penSw','c',p.color);on('#txtSw','c',p.tcolor);on('#fontSeg','f',p.font);on('#posSeg','p',p.pos);
+  on('#scolSeg','v',p.scol||'own');
+  const t=$('#txt');if(t!==document.activeElement)t.value=p.text;
+  $('#txtCnt').textContent=`${[...p.text].length} / 30자`;
+  const sz=$('#size');if(sz!==document.activeElement)sz.value=p.size;
+  $('#sizeV').textContent=p.size.toFixed(1)+'mm';
+  const e=effSize(p),info=$('#fitInfo');let cls='',msg;
+  if(!hasText(p)){cls=' warn';msg='인쇄할 문구를 입력해 주세요.'}
+  else if(e<SIZE.legible){cls=' bad';msg=`문구가 길어 글자가 ${e.toFixed(1)}mm까지 작아집니다. 문구를 줄여 주세요.`}
+  else if(e<p.size-.05){cls=' warn';msg=`인쇄 영역에 맞춰 글자 크기를 ${e.toFixed(1)}mm로 줄였습니다.`}
+  else msg=`문구 폭 ${textW(p,e).toFixed(1)}mm · 글자 크기 ${e.toFixed(1)}mm — 인쇄 가능`;
+  if(hasText(p)&&lowContrast(p)){if(!cls)cls=' warn';msg+=' 글씨 색이 볼펜 색과 비슷해 잘 보이지 않을 수 있습니다.'}
+  info.className='dpi'+cls;info.textContent=msg;
+  const tt=totals();$('#total').textContent=tt.kinds?sumText(tt):'';$('#sum').textContent=tt.kinds?sumText(tt):'';
+  $('#applyAll').disabled=state.pens.length<2;
+  $('#tgGuide').classList.toggle('on',showGuides);
+  $('#hint').innerHTML=(showGuides?'<i class="c1">┅ 인쇄 가능 영역</i>':'')+'<i>볼펜을 누르면 인쇄 위치가 바뀝니다</i><i>로고·이미지 인쇄는 따로 문의해 주세요</i>'}
+function refresh(){ensureFont(pen());syncUI();syncStrip();render()}
+function setField(k,v){if(pen()[k]===v)return;pen()[k]=v;commit();refresh()}
+
+$('#penSw').innerHTML=PEN_COLORS.map(c=>`<button data-c="${c.id}" title="${c.ko}" aria-label="${c.ko}" style="background:${c.hex}"></button>`).join('');
+$('#txtSw').innerHTML=TEXT_COLORS.map(c=>`<button data-c="${c.id}" title="${c.no}번 ${c.ko}" aria-label="${c.no}번 ${c.ko}" style="background:${cssOf(c)}"></button>`).join('');
+// 스티커: 분류 탭을 누르면 그 분류의 그림이 뜨고, 그림을 누르면 문구의 커서 자리에 들어간다
+let stkCat=0;
+function buildStk(){$('#stkTabs').innerHTML=STICKER_SETS.map((x,i)=>`<button data-i="${i}" class="${i===stkCat?'on':''}">${x.ko}</button>`).join('');
+  $('#stkGrid').innerHTML=STICKER_SETS[stkCat].items.map(x=>`<button data-ch="${x.ch}" style="color:${x.c==='#ffffff'?'#b9b9b9':x.c}" title="문구에 넣기">${STKV[x.ch]?`<svg viewBox="-1.15 -1.15 2.3 2.3" width="16" height="16"><path d="${STKV[x.ch].d}" fill="currentColor"/></svg>`:x.ch}</button>`).join('')}
+buildStk();
+$('#stkTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b){stkCat=+b.dataset.i;buildStk()}});
+$('#stkGrid').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||busy)return;const t=$('#txt'),v=t.value,ch=b.dataset.ch;
+  const a=t.selectionStart??v.length,z=t.selectionEnd??v.length,nv=v.slice(0,a)+ch+v.slice(z);
+  if([...nv].length>30)return; // 문구는 30자까지
+  t.value=nv;if(!COARSE)t.focus();try{t.setSelectionRange(a+ch.length,a+ch.length)}catch{}
+  t.dispatchEvent(new Event('input'))});
+const fontBtns=g=>FONTS.filter(f=>f.g===g).map(f=>`<button data-f="${f.id}" style="font-family:'${f.fam}','Noto Sans KR',sans-serif;font-weight:${f.w}" title="${f.ko}">${f.label||f.ko}</button>`).join('');
+$('#fontOld').innerHTML=fontBtns('old');$('#fontNew').innerHTML=fontBtns('new');
+$('#posSeg').innerHTML=Object.keys(POS).map(k=>`<button data-p="${k}">${POS[k].ko}</button>`).join('');
+$('#size').min=SIZE.min;$('#size').max=SIZE.max;
+const pick=(sel,key,field)=>$(sel).addEventListener('click',e=>{const b=e.target.closest('button');if(b)setField(field,b.dataset[key])});
+pick('#penSw','c','color');pick('#txtSw','c','tcolor');pick('#fontSeg','f','font');pick('#posSeg','p','pos');
+pick('#scolSeg','v','scol');
+$('#txt').addEventListener('input',e=>{pen().text=e.target.value;ensureFont(pen());syncUI();render();lazyCommit()});
+$('#size').addEventListener('input',e=>{pen().size=Math.round(+e.target.value*10)/10;syncUI();render();lazyCommit()});
+$('#applyAll').onclick=()=>{const s=pen();for(const p of state.pens){p.text=s.text;p.font=s.font;p.pos=s.pos;p.size=s.size;p.scol=s.scol}stripSig='';commit();refresh()};
+thumbsEl.addEventListener('click',e=>{const t=e.target.closest('.thumb');if(t)selectPen(+t.dataset.i)});
+
+/* ---------- 캔버스: 볼펜을 누르면 가장 가까운 인쇄 위치로 ---------- */
+function penHit(e){const r=cv.getBoundingClientRect(),v=layout(),x=(e.clientX-r.left-v.ox)/v.k;
+  if(Math.abs(e.clientY-r.top-v.oy)>(PEN.R+5)*v.k||x<0||x>PEN.L)return null;
+  const t=(x-ZONE.x0)/(ZONE.x1-ZONE.x0);return t<1/3?'front':t<2/3?'mid':'back'}
+cv.addEventListener('pointermove',e=>{cv.style.cursor=penHit(e)?'pointer':'default'});
+cv.addEventListener('click',e=>{const h=penHit(e);if(h&&!busy)setField('pos',h)});
+
+/* ---------- 키보드 ---------- */
+addEventListener('keydown',e=>{
+  const t=e.target,typing=t.tagName==='INPUT'&&(t.type==='number'||t.type==='text'||t.type==='range');
+  const mod=e.ctrlKey||e.metaKey,key=e.key.toLowerCase();
+  if(!$('#pv').hidden){if(key==='escape'){if(!$('#okDlg').hidden)$('#okClose').click();else closePreview()}return}
+  if(typing||busy)return;
+  if(mod&&key==='z'){e.preventDefault();e.shiftKey?redo():undo();return}
+  if(mod&&key==='y'){e.preventDefault();redo();return}
+  if(key==='pageup'){e.preventDefault();selectPen(ci-1);return}
+  if(key==='pagedown'){e.preventDefault();selectPen(ci+1)}});
+
+/* ---------- 버튼 ---------- */
+$('#undo').onclick=undo;$('#redo').onclick=redo;
+$('#tgGuide').onclick=()=>{showGuides=!showGuides;refresh()};
+$('#addPen').onclick=addPen;$('#cAdd').onclick=addPen;$('#cDel').onclick=delPen;$('#cLeft').onclick=()=>movePen(-1);$('#cRight').onclick=()=>movePen(1);
+$('#qMinus').onclick=()=>setQty(qtyOf(pen())-1);$('#qPlus').onclick=()=>setQty(qtyOf(pen())+1);
+$('#qty').onchange=e=>setQty(e.target.value);
+
+/* ---------- 전체 미리보기: 모든 볼펜을 한 화면에 ---------- */
+const pad=i=>String(i+1).padStart(Math.max(2,String(state.pens.length).length),'0');
+function pvCanvas(p){const ZW=zwOf(p),w=Math.min(720,innerWidth-58),k=w/(PEN.L+6),zk=Math.min(w/ZW,11),ph=PH*k+4,zw=ZW*zk,zh=ZH*zk,h=ph+14+zh,dpr=Math.min(2,window.devicePixelRatio||1),c=document.createElement('canvas');
+  c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);c.style.width=w+'px';c.style.height=h+'px';
+  const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);drawPen(x,k,3*k,(PH-PEN.R)*k+2,p);drawZoom(x,p,(w-zw)/2,ph+14,zw,zh,zk);return c}
+function openPreview(){const grid=$('#pvGrid'),t=totals();grid.innerHTML='';
+  $('#pvSum').textContent=t.kinds?sumText(t):'';
+  if(!t.kinds)grid.innerHTML='<div class="pvEmpty">아직 문구가 없습니다. 인쇄할 문구를 먼저 입력해 주세요.</div>';
+  state.pens.forEach((p,i)=>{if(!hasText(p))return;const e=effSize(p),cell=document.createElement('div');cell.className='pvCell';
+    cell.innerHTML=`<h3>${pad(i)}번 · ${penCol(p).ko} · 글씨 ${tname(p)} · ${fontOf(p).ko} · ${posOf(p).ko} · ${qtyOf(p)}개 ${e<SIZE.legible?'<em>⚠ 글자가 너무 작음</em>':''}${lowContrast(p)?' <em>⚠ 글씨 색이 잘 안 보일 수 있음</em>':''}</h3>`;
+    cell.appendChild(pvCanvas(p));cell.onclick=()=>{closePreview();selectPen(i)};cell.title='누르면 이 볼펜을 편집합니다';grid.appendChild(cell)});
+  $('#pvConfirm').hidden=!t.kinds;
+  $('#pv').hidden=false;document.body.style.overflow='hidden';$('#pvBody').scrollTop=0}
+function closePreview(){$('#pv').hidden=true;document.body.style.overflow=''}
+$('#tgPrev').onclick=openPreview;$('#saveBtn').onclick=openPreview;$('#pvClose').onclick=closePreview;
+
+/* ---------- 내보내기 ---------- */
+const crcT=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32(u){let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=crcT[(c^u[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0}
+// ZIP 표준 암호화(ZipCrypto): 윈도우 탐색기·반디집·알집에서 암호를 물어본다
+function zipCrypt(data,crc,pw){
+  let k0=0x12345678,k1=0x23456789,k2=0x34567890;
+  const upd=c=>{k0=(crcT[(k0^c)&255]^(k0>>>8))>>>0;k1=(k1+(k0&255))>>>0;k1=(Math.imul(k1,134775813)+1)>>>0;k2=(crcT[(k2^(k1>>>24))&255]^(k2>>>8))>>>0};
+  for(const c of new TextEncoder().encode(pw))upd(c);
+  const out=new Uint8Array(data.length+12),hd=new Uint8Array(12);
+  if(globalThis.crypto&&globalThis.crypto.getRandomValues)globalThis.crypto.getRandomValues(hd);else for(let i=0;i<12;i++)hd[i]=Math.random()*256;
+  hd[11]=crc>>>24;
+  const enc=p=>{const t=(k2|2)&0xffff,c=p^(((t*(t^1))>>>8)&255);upd(p);return c};
+  for(let i=0;i<12;i++)out[i]=enc(hd[i]);
+  for(let i=0;i<data.length;i++)out[i+12]=enc(data[i]);
+  return out}
+// 무압축 ZIP (파일명 UTF-8, pw를 주면 암호화)
+function zipStore(files,pw){const flag=0x0800|(pw?1:0);
+  const te=new TextEncoder(),parts=[],cen=[],now=new Date();let off=0;
+  const dt=((now.getFullYear()-1980)<<9)|((now.getMonth()+1)<<5)|now.getDate(),tm=(now.getHours()<<11)|(now.getMinutes()<<5)|(now.getSeconds()>>1);
+  for(const f of files){const nm=te.encode(f.name),crc=crc32(f.data),n=f.data.length,body=pw?zipCrypt(f.data,crc,pw):f.data,cn=body.length;
+    const lh=new Uint8Array(30+nm.length),v=new DataView(lh.buffer);
+    v.setUint32(0,0x04034b50,true);v.setUint16(4,20,true);v.setUint16(6,flag,true);v.setUint16(10,tm,true);v.setUint16(12,dt,true);
+    v.setUint32(14,crc,true);v.setUint32(18,cn,true);v.setUint32(22,n,true);v.setUint16(26,nm.length,true);lh.set(nm,30);
+    const ch=new Uint8Array(46+nm.length),c=new DataView(ch.buffer);
+    c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,flag,true);c.setUint16(12,tm,true);c.setUint16(14,dt,true);
+    c.setUint32(16,crc,true);c.setUint32(20,cn,true);c.setUint32(24,n,true);c.setUint16(28,nm.length,true);c.setUint32(42,off,true);ch.set(nm,46);
+    parts.push(lh,body);cen.push(ch);off+=lh.length+cn}
+  const cs=cen.reduce((a,x)=>a+x.length,0),e=new Uint8Array(22),ev=new DataView(e.buffer);
+  ev.setUint32(0,0x06054b50,true);ev.setUint16(8,files.length,true);ev.setUint16(10,files.length,true);ev.setUint32(12,cs,true);ev.setUint32(16,off,true);
+  return new Blob([...parts,...cen,e],{type:'application/zip'})}
+const DPI=1200; // 대지에 들어가는 문구 이미지의 해상도
+const ZIP_PW='123123'; // 내려받는 ZIP의 압축 암호
+const SANS='"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",sans-serif';
+const BOARD={w:145,h:10}; // 대지 크기(mm). 인쇄 영역(점선 자리)이 대지 정가운데에 온다
+function toRgb(c){const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data,rgb=new Uint8Array(c.width*c.height*3);
+  for(let i=0,j=0;i<d.length;i+=4){rgb[j++]=d[i];rgb[j++]=d[i+1];rgb[j++]=d[i+2]}return{rgb,w:c.width,h:c.height}}
+function textImg(t,px){const c=document.createElement('canvas'),font=`700 ${px}px ${SANS}`;
+  let x=c.getContext('2d');x.font=font;c.width=Math.ceil(x.measureText(t).width+px*.5);c.height=Math.ceil(px*1.5);
+  x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.fillStyle='#000';x.font=font;x.textBaseline='middle';x.fillText(t,px*.25,c.height/2+px*.04);
+  return toRgb(c)}
+// 대지에 놓을 문구 이미지(윤곽선을 만들 수 없을 때만 쓴다): 흰 바탕에 문구(스티커 포함)만
+function artOf(p){const k=DPI/25.4,q=p,wmm=Math.min(BOARD.w,textW(q,effSize(q))+4),hmm=8,c=document.createElement('canvas');
+  c.width=Math.round(wmm*k);c.height=Math.round(hmm*k);const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);
+  drawText(x,k,c.width/2-textCx(q)*k,c.height/2,q);
+  return{im:toRgb(c),wmm,hmm,cx:(BOARD.w-(ZONE.x1-ZONE.x0))/2+textCx(q)-ZONE.x0}} // cx = 대지 왼쪽 끝에서 문구 가운데까지(mm)
+// 예시 이미지: 회색 바탕에 볼펜을 한 줄씩, 위에 색 이름과 수량
+function proofCanvas(items,head){const k=6,W=1000,rh=122,top=70,c=document.createElement('canvas');c.width=W;c.height=top+items.length*rh+16;
+  const x=c.getContext('2d');x.fillStyle='#6a6a6a';x.fillRect(0,0,W,c.height);
+  x.fillStyle='#fff';x.textBaseline='middle';x.font='700 24px '+SANS;x.fillText(head,(W-PEN.L*k)/2,36);
+  items.forEach((it,i)=>{const y=top+i*rh,p=it.p;x.fillStyle='#fff';x.textAlign='left';x.textBaseline='middle';x.font='700 22px '+SANS;
+    x.fillText(`${it.no}  ${penCol(p).ko} ${it.q}개`,(W-PEN.L*k)/2,y+13);
+    drawPen(x,k,(W-PEN.L*k)/2,y+30+(PH-PEN.R)*k,p)});
+  return c}
+/* ---------- 윤곽선(벡터) 만들기: 글꼴 파일을 직접 읽어 글자 모양을 선으로 뽑는다 ---------- */
+const LIBS={ot:'https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js',w2:'https://cdn.jsdelivr.net/npm/wawoff2@2.0.1/build/decompress_binding.js'};
+const loadScript=src=>new Promise((res,rej)=>{const e=document.createElement('script');e.src=src;e.onload=res;e.onerror=()=>rej(new Error('불러오기 실패: '+src));document.head.appendChild(e)});
+let libP;function loadLibs(){return libP||(libP=(async()=>{await loadScript(LIBS.ot);
+  const ready=new Promise(r=>{window.Module={onRuntimeInitialized:r}});await loadScript(LIBS.w2);await ready})())} // opentype.js(글꼴 읽기) + wawoff2(woff2 풀기)
+function parseRange(v){if(!v)return null;return v.split(',').map(t=>{t=t.trim().replace(/^U\+/i,'');if(t.includes('?'))return[parseInt(t.replace(/\?/g,'0'),16),parseInt(t.replace(/\?/g,'F'),16)];const [a,b]=t.split('-');return[parseInt(a,16),parseInt(b||a,16)]})}
+// 이 화면이 쓰는 모든 @font-face(구글 폰트 포함)에서 글꼴 이름·굵기·파일 주소·담당 글자 범위를 모은다
+let FACES;function fontFaces(){const out=[];for(const sh of document.styleSheets){let rules;try{rules=sh.cssRules}catch{continue}
+  for(const r of rules){if(r.type!==5)continue;const st=r.style,m=/url\(["']?([^"')]+)["']?\)/.exec(st.getPropertyValue('src'));if(!m)continue;
+    const w=st.getPropertyValue('font-weight').replace('normal','400').replace('bold','700')||'400';
+    out.push({fam:st.getPropertyValue('font-family').replace(/["']/g,'').trim(),w,url:new URL(m[1],sh.href||location.href).href,range:parseRange(st.getPropertyValue('unicode-range'))})}}return out}
+const otCache={};
+function loadOt(url){return otCache[url]||(otCache[url]=(async()=>{let u8=new Uint8Array(await(await fetch(url)).arrayBuffer());
+  if(u8[0]===0x77&&u8[1]===0x4f&&u8[2]===0x46&&u8[3]===0x32){const d=Module.decompress(u8);if(!d)throw new Error('woff2');u8=d}
+  return opentype.parse(u8.buffer.slice(u8.byteOffset,u8.byteOffset+u8.byteLength))})())}
+async function fontFor(cp,fams,weight){FACES=FACES||fontFaces(); // 이 글자를 가진 글꼴 파일을 찾는다(없으면 다음 글꼴로)
+  for(const fam of fams){const fs=FACES.filter(f=>f.fam===fam&&(!f.range||f.range.some(([a,b])=>cp>=a&&cp<=b)));if(!fs.length)continue;
+    const dist=f=>{const [a,b=a]=String(f.w).split(' ').map(Number);return weight<a?a-weight:weight>b?weight-b:0};fs.sort((x,y)=>dist(x)-dist(y));
+    try{const font=await loadOt(fs[0].url);if(font.charToGlyphIndex(String.fromCodePoint(cp))>0)return font}catch{}}
+  return null}
+// 한 묶음의 글자를 윤곽선 명령으로: 왼쪽 끝 x=0, 글자 밑선 y=0, 단위는 size와 같다. 못 만드는 글자가 있으면 null
+async function outlineText(text,fams,weight,size){const cmds=[];let x=0,seg='',segFont=null;
+  const flush=()=>{if(!seg)return;cmds.push(...segFont.getPath(seg,x,0,size).commands);x+=segFont.getAdvanceWidth(seg,size);seg=''};
+  for(const ch of text){const cp=ch.codePointAt(0);if(cp===0xFE0F)continue;const font=await fontFor(cp,fams,weight);
+    if(!font){if(/\s/.test(ch)){flush();x+=size*.3;continue}return null}
+    if(font!==segFont){flush();segFont=font}seg+=ch}
+  flush();return{cmds,adv:x}}
+function parseD(d){const t=d.match(/[MLCZ]|-?\d*\.?\d+/g),out=[];let i=0,cmd;
+  while(i<t.length){if(/[MLCZ]/.test(t[i]))cmd=t[i++];if(cmd==='Z'){out.push({type:'Z'});continue}
+    const n=cmd==='C'?6:2,v=t.slice(i,i+n).map(Number);i+=n;out.push(cmd==='C'?{type:'C',x1:v[0],y1:v[1],x2:v[2],y2:v[3],x:v[4],y:v[5]}:{type:cmd,x:v[0],y:v[1]})}return out}
+const moveCmds=(cmds,a,dx,dy)=>cmds.map(c=>{const o={type:c.type};for(const k of['x','x1','x2'])if(c[k]!=null)o[k]=c[k]*a+dx;for(const k of['y','y1','y2'])if(c[k]!=null)o[k]=c[k]*a+dy;return o});
+// 볼펜 한 종의 문구를 윤곽선으로: 좌표는 대지 기준 mm(왼쪽 위가 0,0). 색이 같은 것끼리 한 덩어리(layer)로 묶는다
+async function vectorArt(p){const q=p,s=effSize(q),f=fontOf(q),col=txtCol(q),parts=[];let W=0;
+  for(const r of runsOf(q.text)){const key=emoKey(r.t),own=r.e&&q.scol!=='text'&&STKC[key],v=r.e&&STKV[key];let part;
+    if(v){const adv=s*ST.s*VW;part={adv,cmds:moveCmds(parseD(v.d),s*ST.s*.46,adv/2,0)}}
+    else{const o=await outlineText(r.t,r.e?['Noto Emoji']:[f.fam,'Noto Sans KR'],r.e?400:f.w,r.e?s*ST.s:s);if(!o)return null;
+      mcx.font=r.e?emoCss(100):fontCss(f,100);const m=mcx.measureText(r.t); // 화면과 같은 높이에 놓기: 가운데 맞춤 기준에서 글자 밑선까지의 거리
+      part={adv:o.adv,cmds:moveCmds(o.cmds,1,0,(m.fontBoundingBoxAscent-m.fontBoundingBoxDescent)/200*s+s*.04)}}
+    part.fill=own||'';parts.push(part);W+=part.adv}
+  const zl=(BOARD.w-(ZONE.x1-ZONE.x0))/2,zr=zl+ZONE.x1-ZONE.x0,al=posOf(q).al,x0=al==='left'?zl+ZONE.pad:al==='right'?zr-ZONE.pad-W:(zl+zr)/2-W/2,layers=new Map();let x=x0;
+  for(const pt of parts){if(!layers.has(pt.fill))layers.set(pt.fill,[]);layers.get(pt.fill).push(...moveCmds(pt.cmds,1,x,BOARD.h/2));x+=pt.adv}
+  return{vec:[...layers].map(([k,cmds])=>({col:k?{hex:k}:col,cmds})),x0,W,s}}
+// 그라데이션 글씨용 바탕 그림: 윤곽선 모양대로 오려 낼(클리핑) 색 띠
+function gradImg(col,W,s){const k=600/25.4,wmm=W+2,hmm=s*1.8,c=document.createElement('canvas');c.width=Math.round(wmm*k);c.height=Math.round(hmm*k);
+  const x=c.getContext('2d');x.fillStyle=paintOf(x,col,k,c.height/2,W*k,s*k);x.fillRect(0,0,c.width,c.height);return{im:toRgb(c),wmm,hmm}}
+// 윤곽선 명령 → 닫힌 선 하나하나(sub)로 나누고, 2차 곡선은 3차 곡선으로 바꾼다. X,Y = 좌표 변환 함수
+function subsOf(cmds,X,Y){const subs=[];let cur=null,px=0,py=0;
+  for(const c of cmds){if(c.type==='M'){cur=[{t:'M',x:X(c.x),y:Y(c.y)}];subs.push(cur);px=c.x;py=c.y}
+    else if(c.type==='L'){cur.push({t:'L',x:X(c.x),y:Y(c.y)});px=c.x;py=c.y}
+    else if(c.type==='C'){cur.push({t:'C',x1:X(c.x1),y1:Y(c.y1),x2:X(c.x2),y2:Y(c.y2),x:X(c.x),y:Y(c.y)});px=c.x;py=c.y}
+    else if(c.type==='Q'){cur.push({t:'C',x1:X(px+2/3*(c.x1-px)),y1:Y(py+2/3*(c.y1-py)),x2:X(c.x+2/3*(c.x1-c.x)),y2:Y(c.y+2/3*(c.y1-c.y)),x:X(c.x),y:Y(c.y)});px=c.x;py=c.y}}
+  return subs.filter(u=>u.length>1)}
+// 일러스트레이터에서 열리는 EPS: 그림·윤곽선(items)과 대지(boards)를 좌표대로 놓는다. 단위 pt, y는 위쪽이 +, 그림의 (x,y)와 대지의 (x1,y1)은 왼쪽 위 모서리
+function buildEps(Wt,Ht,items,boards,title){
+  const cx=Wt/2,cy=Ht/2,OX=8191.5-cx,OY=8191.5+cy;
+  const f=v=>String(Math.round(v*1e4)/1e4),g=v=>String(Math.round(v*1e8)/1e8);
+  const uuid=()=>'xxxxxxxx-xxxx-4xxx-8xxx-xxxxxxxxxxxx'.replace(/x/g,()=>(Math.random()*16|0).toString(16));
+  const te=new TextEncoder(),parts=[];let txt='';
+  const flush=()=>{if(txt){parts.push(te.encode(txt));txt=''}},L=s=>{txt+=s+'\r\n'};
+  const raster=({im,x,y,w,h})=>{const m=`[ ${g(w/im.w)} 0 0 ${g(h/im.h)} ${f(x)} ${f(y)} ]`;
+    L('0 A');L('%AI5_File:');L('%AI5_BeginRaster');L('/DeviceRGB XN');
+    L(`${m} ${im.w} ${im.h} 0 Xh`);L(`${m} 0 0 ${im.w} ${im.h} ${im.w} ${im.h} 8 3 0 1 1 0 4 4 0 0`);
+    L(`%%BeginData: ${im.rgb.length+4}`);txt+='XI\n';flush();parts.push(im.rgb);
+    L('%%EndData');L('XH');L('%AI5_EndRaster');L('N')};
+  L('%!PS-Adobe-3.0 EPSF-3.0');L('%%Creator: Adobe Illustrator(R) 24.0');L('%%AI8_CreatorVersion: 24.0.0');L(`%%Title: (${title})`);
+  L(`%%BoundingBox: 0 0 ${Math.ceil(Wt)} ${Math.ceil(Ht)}`);L(`%%HiResBoundingBox: 0 0 ${f(Wt)} ${f(Ht)}`);
+  L('%%DocumentProcessColors: Cyan Magenta Yellow Black');L('%AI5_FileFormat 14.0');L('%AI3_ColorUsage: Color');L('%AI7_ImageSettings: 0');
+  L(`%AI3_Cropmarks: ${f(boards[0].x1)} ${f(boards[0].y2)} ${f(boards[0].x2)} ${f(boards[0].y1)}`);
+  L(`%AI3_TemplateBox: ${f(cx)} ${f(cy)} ${f(cx)} ${f(cy)}`);L('%AI3_DocumentPreview: None');L('%AI5_ArtSize: 14400 14400');L('%AI5_RulerUnits: 1');
+  L('%AI24_LargeCanvasScale: 1');L('%AI9_ColorModel: 1');L('%AI5_ArtFlags: 0 0 0 1 0 0 1 0 0');L('%AI5_TargetResolution: 800');L('%AI5_NumLayers: 1');
+  L('%AI5_OpenViewLayers: 7');L('%%PageOrigin:0 0');L('%AI9_Flatten: 1');L('%AI12_CMSettings: 00.MS');L('%%EndComments');
+  L('%%BeginProlog');L('%%EndProlog');L('%%BeginSetup');
+  L('%AI9_BeginDocumentData');L('%_/Document :');L('%_/Dictionary :');L('%_16383 /Int (AIDocumentCanvasSize) ,');L('%_/Array :');
+  boards.forEach((b,i)=>{L('%_/Dictionary :');L(`%_(${uuid()}) /String (ArtboardUUID) ,`);L(`%_${i?0:1} /Bool (IsArtboardSelected) ,`);L('%_0 /Int (DisplayMark) ,');
+    L(`%_${f(b.x2)} ${f(b.y2)} /RealPointRelToROrigin`);L('%_ (PositionPoint2) ,');L(`%_${f(b.x1)} ${f(b.y1)} /RealPointRelToROrigin`);L('%_ (PositionPoint1) ,');
+    L(`%_${f(OX+b.x1)} ${f(OY-b.y1)} /RealPoint`);L('%_ (RulerOrigin) ,');L('%_0 /Bool (IsArtboardDefaultName) ,');L(`%_(${b.name}) /UnicodeString (Name) ,`);L('%_1 /Real (PAR) ,');L('%_; ,')});
+  L('%_; (ArtboardArray) ,');L('%_1 /Int (CropAreaActive) ,');L('%_; /Recorded ,');L('%_/Dictionary : /NotRecorded ,');L(`%_${boards.length} /Int (LastArtboardID) ,`);
+  L('%_0 /Bool (AISaveMultipleArtboards) ,');L('%_; /NotRecorded ,');L('%_;');L('%AI9_EndDocumentData');L('%%EndSetup');
+  L('%AI5_BeginLayer');L('1 1 1 1 0 0 1 0 79 128 255 0 50 0 Lb');L('(Layer 1) Ln');L('0 A');
+  // 윤곽선: 색이 같은 선들을 컴파운드 패스 하나로. 색은 CMYK와 RGB를 함께 적는다
+  const col7=hex=>{if(hex.toLowerCase()===WHITE)return'0 0 0.02 0 1 1 '+g(250/255); // 화이트 = 옐로우 2%
+    const n=parseInt(hex.slice(1),16),r=(n>>16&255)/255,gr=(n>>8&255)/255,b=(n&255)/255,k=1-Math.max(r,gr,b),d=1-k||1;return[(1-r-k)/d,(1-gr-k)/d,(1-b-k)/d,k,r,gr,b].map(g).join(' ')};
+  const pathOps=(subs,end)=>{for(const sp of subs){for(const c of sp)L(c.t==='M'?`${f(c.x)} ${f(c.y)} m`:c.t==='L'?`${f(c.x)} ${f(c.y)} L`:`${f(c.x1)} ${f(c.y1)} ${f(c.x2)} ${f(c.y2)} ${f(c.x)} ${f(c.y)} C`);end.forEach(L)}};
+  const vector=it=>{L('0 A');L('*u');L('0 O');L(col7(it.hex)+' Xa');L('0 XR');pathOps(it.subs,['f']);L('*U')};
+  const clip=it=>{L('q');L('0 A');L('*u');L('0 XR');pathOps(it.subs,['h','W','n']);L('*U');raster(it.ras);L('Q')}; // 그라데이션: 색 띠 그림을 글자 모양으로 오려 낸다
+  items.forEach(it=>it.subs?(it.ras?clip(it):vector(it)):raster(it));
+  L('LB');L('%AI5_EndLayer--');L('%%PageTrailer');L('gsave annotatepage grestore showpage');L('%%Trailer');L('%%EOF');flush();
+  let n=0;for(const q of parts)n+=q.length;const out=new Uint8Array(n);let o=0;for(const q of parts){out.set(q,o);o+=q.length}return out}
+// 한 장 배치: 맨 위에 예시 이미지, 그 아래로 볼펜마다 [설명 한 줄 + 145×10mm 대지]. 문구는 인쇄 영역이 대지 정가운데에 오는 자리에 놓인다
+function buildPenEps(proof,arts){const MM=72/25.4,AW=BOARD.w*MM,AH=BOARD.h*MM,PW=AW+60,pad=24,Wt=PW+pad*2,ph=PW*proof.h/proof.w,LH=9,G1=30,G2=5,G3=14;
+  const Ht=pad+ph+G1+arts.length*(LH+G2+AH+G3)+pad-G3,bx=(Wt-AW)/2,items=[{im:proof,x:pad,y:Ht-pad,w:PW,h:ph}],boards=[];let y=Ht-pad-ph-G1;
+  for(const a of arts){items.push({im:a.label,x:bx,y,w:a.label.w*LH/a.label.h,h:LH});y-=LH+G2;const top=y,X=v=>bx+v*MM,Y=v=>top-v*MM;
+    boards.push({x1:bx,y1:y,x2:bx+AW,y2:y-AH,name:a.name});
+    if(a.vec)for(const ly of a.vec){const subs=subsOf(ly.cmds,X,Y);if(!subs.length)continue;
+      if(ly.col.grad){const gi=gradImg(ly.col,a.W,a.s);items.push({subs,ras:{im:gi.im,x:X(a.x0-1),y:Y(BOARD.h/2-gi.hmm/2),w:gi.wmm*MM,h:gi.hmm*MM}})}
+      else items.push({subs,hex:ly.col.hex})}
+    else items.push({im:a.im,x:bx+(a.cx-a.wmm/2)*MM,y:y-(BOARD.h-a.hmm)/2*MM,w:a.wmm*MM,h:a.hmm*MM});
+    y-=AH+G3}
+  return buildEps(Wt,Ht,items,boards,'pen')}
+function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),10000)}
+// PC는 바로 저장. 휴대폰은 만든 뒤 버튼을 직접 눌러 저장·공유하게 한다(자동 저장이 막히는 기기 대비).
+function deliver(blob,name){if(!COARSE)return download(blob,name);
+  let file=null,can=false;try{file=new File([blob],name,{type:'application/zip'});can=!!(navigator.canShare&&navigator.canShare({files:[file]}))}catch{}
+  $('#doneName').textContent=name;$('#doneSave').onclick=()=>download(blob,name);
+  $('#doneShare').hidden=!can;$('#doneShare').onclick=()=>navigator.share({files:[file],title:name}).catch(()=>{});
+  $('#done').hidden=false}
+const status=t=>{$('#expStatus').textContent=t};
+const cleanName=s=>s.replace(/[\/:*?"<>|()\x00-\x1f]/g,'').trim().slice(0,30);
+const tick=()=>new Promise(r=>setTimeout(r,0));
+async function exportAll(){
+  if(busy)return;const name=cleanName($('#oname').value),ono=cleanName($('#ono').value),items=[];
+  state.pens.forEach((p,i)=>{if(hasText(p))items.push({p,no:pad(i),q:qtyOf(p)})});
+  if(!items.length)return alert('내보낼 내용이 없습니다. 인쇄할 문구를 먼저 입력해 주세요.');
+  if(!name){alert('주문자명을 입력해 주세요.');$('#oname').focus();return}
+  if(!ono){alert('주문번호를 입력해 주세요.');$('#ono').focus();return}
+  if(items.length>120)return alert('한 번에 저장할 수 있는 볼펜은 120종까지입니다. 나누어 저장해 주세요.');
+  busy=true;$('#expAll').disabled=true;
+  try{const t=totals(),sum=sumText(t),n=new Date(),p2=v=>String(v).padStart(2,'0'),base=`볼펜_${name}_${ono}_${t.kinds}종_${t.total}개`,arts=[],rows=[];
+    status('글씨체 준비 중…');
+    try{await Promise.all(items.flatMap(it=>[document.fonts.load(fontCss(fontOf(it.p),40),it.p.text),...(hasSticker(it.p)?[document.fonts.load(emoCss(40),it.p.text)]:[])]))}catch{}
+    // 스티커 글꼴이 없으면 기기마다 다른 그림이 인쇄 파일에 들어가므로 막는다
+    if(items.some(it=>hasSticker(it.p)&&!document.fonts.check(emoCss(40),it.p.text)))throw new Error('스티커 글꼴을 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.');
+    status('윤곽선 도구 준비 중…');let canVec=true;try{await loadLibs()}catch{canVec=false}
+    status('예시 이미지 만드는 중…');await tick();
+    const proof=toRgb(proofCanvas(items,`주문자 ${name}  ·  주문번호 ${ono}  ·  ${sum}`));
+    for(let i=0;i<items.length;i++){const {p,no,q}=items[i],bn=`${no}_${penCol(p).ko}_${q}개`,tc=tname(p);
+      status(`대지 만드는 중… ${i+1} / ${items.length}`);await tick();
+      let art=null;if(canVec)try{art=await vectorArt(p)}catch{}
+      const how=art?'윤곽선':'이미지';if(!art)art=artOf(p); // 윤곽선을 못 만들면(글꼴에 없는 글자 등) 이미지로 넣는다
+      arts.push({...art,name:bn,label:textImg(`${no}  ${penCol(p).ko} ${q}개  ·  글씨 ${tc}  ·  ${fontOf(p).ko}  ·  ${posOf(p).ko}${art.vec?'':'  ·  이미지'}`,40)});
+      rows.push(`${no}번 | ${penCol(p).ko} | ${p.text} | ${fontOf(p).ko} | ${tc} | ${posOf(p).ko} | ${effSize(p).toFixed(1)}mm | ${hasSticker(p)?(p.scol==='text'?'글씨 색':'원래 색'):'-'} | ${q}개 | ${bn} | ${how}`)}
+    status('파일로 묶는 중…');await tick();
+    const sheet=['[볼펜 주문 내역]',`주문자명: ${name}`,`주문번호: ${ono}`,`작성일시: ${n.getFullYear()}-${p2(n.getMonth()+1)}-${p2(n.getDate())} ${p2(n.getHours())}:${p2(n.getMinutes())}`,
+      '인쇄: 옆면 한쪽, 문구 1줄',`합계: ${sum}`,
+      `EPS: 맨 위에 예시 이미지, 아래에 볼펜마다 대지 1개(${BOARD.w}×${BOARD.h}mm). 인쇄 영역(${ZONE.x1-ZONE.x0}×${ZONE.h}mm)이 대지 정가운데에 오도록 문구를 놓았습니다. 문구는 글자 윤곽선(벡터)으로 들어 있습니다. 윤곽선을 만들 수 없는 경우에만 이미지(${DPI}dpi)로 넣습니다.`,
+      '위치: 앞 = 인쇄 영역 왼쪽 끝(펜촉 쪽) 맞춤, 중간 = 가운데 맞춤, 뒤 = 오른쪽 끝(클립 쪽) 맞춤','화이트는 완전한 흰색이 아니라 옐로우 2%(C0 M0 Y2 K0)로 들어 있습니다. 흰 대지에서는 거의 보이지 않으니 선택하거나 윤곽선 보기로 확인해 주세요. 그라데이션 글씨는 색 띠 그림을 글자 윤곽선으로 오려 낸(클리핑) 형태입니다.','',
+      '번호 | 볼펜 색 | 문구 | 글씨체 | 글씨 색 | 위치 | 글자 크기 | 스티커 색 | 수량 | 대지 이름 | 문구 형태',...rows,''].join('\r\n');
+    const files=[{name:base+'.eps',data:buildPenEps(proof,arts)},{name:'주문내역.txt',data:new TextEncoder().encode('﻿'+sheet)}];
+    deliver(zipStore(files,ZIP_PW),base+'.zip');status('저장이 끝났습니다. 내려받은 ZIP 파일을 주문하신 곳으로 보내 주세요.')}
+  catch(err){status('');alert('내보내기 실패: '+err.message)}
+  finally{busy=false;$('#expAll').disabled=false}}
+$('#expAll').onclick=exportAll;
+// 제작확정 → 주문자명·주문번호를 적고 확인을 누르면 파일을 받는다
+$('#pvOk').onclick=()=>{status('');$('#okDlg').hidden=false;const a=$('#oname');(a.value.trim()?$('#ono'):a).focus()};
+$('#okClose').onclick=()=>{if(!busy)$('#okDlg').hidden=true};
+$('#okDlg').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'){e.preventDefault();exportAll()}});
+function setTheme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem('pen_theme',t)}catch{}
+  document.querySelectorAll('#themeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));render()}
+document.querySelectorAll('#themeSeg button').forEach(b=>b.onclick=()=>setTheme(b.dataset.t));
+$('#doneClose').onclick=()=>{$('#done').hidden=true};
+// 카카오톡 등 앱 안의 화면에서는 파일 저장이 막히는 경우가 많다 → 기본 브라우저로 안내
+(()=>{const ua=navigator.userAgent,kakao=/KAKAOTALK/i.test(ua);if(!kakao&&!/NAVER\(inapp|Instagram|FBAN|FBAV|Line\//i.test(ua))return;
+  $('#inapp').hidden=false;
+  $('#inappCopy').onclick=()=>{try{navigator.clipboard.writeText(location.href).then(()=>{$('#inappCopy').textContent='복사됨'})}catch{}};
+  if(kakao){const go=()=>{location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(location.href)};
+    $('#inappBtn').hidden=false;$('#inappBtn').onclick=go;
+    try{if(!sessionStorage.getItem('pen_ext')){sessionStorage.setItem('pen_ext','1');go()}}catch{}}})();
+try{$('#oname').value=localStorage.getItem('pc_oname')||''}catch{}
+$('#oname').oninput=e=>{try{localStorage.setItem('pc_oname',e.target.value)}catch{}};
+
+/* ---------- 시작 ---------- */
+new ResizeObserver(render).observe(stage);
+try{document.fonts.addEventListener('loadingdone',()=>{stripSig='';syncUI();syncStrip();render()})}catch{} // 글씨체가 도착하면 다시 그린다
+setTheme(isLight()?'light':'dark');
+commit();refresh();
+</script>
+</body>
+</html>
