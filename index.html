@@ -126,9 +126,6 @@ small{color:var(--mut);display:block}
 .shp svg{width:32px;height:28px;fill:currentColor;opacity:.8}
 #metalSw button{box-shadow:none}
 #faceSw{margin-bottom:8px}
-#faceMore{margin:0;padding:6px 10px!important;font-size:12px}
-#faceSw2{margin-top:8px}
-#faceSw2[hidden]{display:none}
 #applyAll{margin:0}
 .qty{display:flex;align-items:center;gap:5px;margin-bottom:6px}
 .qty button{padding:4px 10px}
@@ -236,8 +233,7 @@ const BRAND_OK=location.protocol==='file:'||brandHostOk(location.hostname);
 
   <h2><b class="n">4</b>바탕 색<em id="faceName"></em></h2>
   <div class="sw" id="faceSw"></div>
-  <button class="full" id="faceMore"></button>
-  <div class="sw sq" id="faceSw2" hidden></div>
+  <div class="sw sq" id="faceSw2"></div>
 
   <h2><b class="n">5</b>이름 · 연락처<em id="txtCnt"></em></h2>
   <input type="text" id="txt" maxlength="12" placeholder="이름  예 : Coco" autocomplete="off">
@@ -393,7 +389,7 @@ const GRADS=[
 const TEXT_COLORS=[];
 SHADES.forEach((sh,r)=>HUES.forEach((h,i)=>TEXT_COLORS.push({id:'c'+(r*10+i+1),no:r*10+i+1,ko:h.names?h.names[r]:sh+h.ko,hex:h.c[r]})));
 GRADS.forEach((g,i)=>TEXT_COLORS.push({id:'g'+(i+1),no:51+i,ko:g.ko+' 그라데이션',hex:g.g[g.g.length>>1],grad:g.g}));
-// 바탕 색 더 보기: 글씨 색 팔레트 60색(단색 50 + 그라데이션 10)을 바탕에도 쓴다. id는 글씨 색과 같고, 이름 앞에 번호가 붙는다('12번 레드')
+// 바탕 색 전체(추천 8색 아래에 항상 나열): 글씨 색 팔레트 60색(단색 50 + 그라데이션 10)을 바탕에도 쓴다. id는 글씨 색과 같고, 이름 앞에 번호가 붙는다('12번 레드')
 const FACE_MORE=TEXT_COLORS.map(c=>{const n=parseInt(c.hex.slice(1),16);return{...c,ko:`${c.no}번 ${c.ko}`,dark:(.299*(n>>16&255)+.587*(n>>8&255)+.114*(n&255))/255<.5?1:0}});
 // 글씨체: 인식표 추천 4종(g:'rec')을 먼저, 기존 8종(g:'old'), 새로 고른 9종(g:'new') 순서. lat = 영문 전용, pair = 한글이 들어오면 대신 쓸 글씨체. fam = 웹폰트 이름, w = 굵기, label = 버튼에 보이는 글자
 // 추가하려면 맨 위 @font-face(또는 구글 폰트 주소)에도 넣어야 한다
@@ -577,7 +573,6 @@ function totals(){let kinds=0,total=0; // 이름이 있는 인식표만 센다
 const sumText=t=>`${t.kinds}종 · 총 ${t.total}개`;
 function syncUI(){const p=cur(),on=(sel,key,val)=>document.querySelectorAll(sel+' button').forEach(b=>b.classList.toggle('on',b.dataset[key]===val));
   on('#shapeSeg','s',kindOf(p).id);on('#szSeg','z',szOf(p));on('#metalSw','c',metalOf(p).id);on('#faceSw','c',faceOf(p).id);on('#faceSw2','c',faceOf(p).id);
-  const more=$('#faceSw2');more.hidden=!(faceOpen||!FACES.includes(faceOf(p)));$('#faceMore').textContent=more.hidden?'색 더 보기 ▾ (60색 · 그라데이션 포함)':'추천 색만 보기 ▴';
   on('#txtSw','c',p.tcolor);on('#fontSeg','f',p.font);on('#scolSeg','v',p.scol||'own');
   document.querySelectorAll('#szSeg button').forEach(b=>{b.textContent=`${b.dataset.z} · ${kindOf(p).dim[b.dataset.z]}`});
   $('#shapeName').textContent=kindOf(p).ko;$('#sizeName').textContent=dimOf(p);$('#metalName').textContent=metalOf(p).ko;$('#faceName').textContent=faceOf(p).ko;
@@ -608,7 +603,6 @@ $('#szSeg').innerHTML='<button data-z="S"></button><button data-z="L"></button>'
 $('#metalSw').innerHTML=METALS.map(c=>`<button data-c="${c.id}" title="${c.ko}" aria-label="${c.ko}" style="background:linear-gradient(135deg,${c.hi},${c.base} 50%,${c.lo})"></button>`).join('');
 $('#faceSw').innerHTML=FACES.map(c=>`<button data-c="${c.id}" title="${c.ko}" aria-label="${c.ko}" style="background:${c.hex}"></button>`).join('');
 $('#faceSw2').innerHTML=FACE_MORE.map(c=>`<button data-c="${c.id}" title="${c.ko}" aria-label="${c.ko}" style="background:${cssOf(c)}"></button>`).join('');
-let faceOpen=false;$('#faceMore').onclick=()=>{faceOpen=$('#faceSw2').hidden;syncUI()}; // 색 더 보기 펼치기·접기(펼친 색을 쓰는 중이면 접히지 않는다)
 $('#txtSw').innerHTML=TEXT_COLORS.map(c=>`<button data-c="${c.id}" title="${c.no}번 ${c.ko}" aria-label="${c.no}번 ${c.ko}" style="background:${cssOf(c)}"></button>`).join('');
 // 스티커: 분류 탭을 누르면 그 분류의 그림이 뜨고, 그림을 누르면 문구의 커서 자리에 들어간다
 let stkCat=0;
