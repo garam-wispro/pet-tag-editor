@@ -125,6 +125,10 @@ small{color:var(--mut);display:block}
 .shp button{display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 0 6px;font-size:11px;letter-spacing:-.04em}
 .shp svg{width:32px;height:28px;fill:currentColor;opacity:.8}
 #metalSw button{box-shadow:none}
+#faceSw{margin-bottom:8px}
+#faceMore{margin:0;padding:6px 10px!important;font-size:12px}
+#faceSw2{margin-top:8px}
+#faceSw2[hidden]{display:none}
 #applyAll{margin:0}
 .qty{display:flex;align-items:center;gap:5px;margin-bottom:6px}
 .qty button{padding:4px 10px}
@@ -232,6 +236,8 @@ const BRAND_OK=location.protocol==='file:'||brandHostOk(location.hostname);
 
   <h2><b class="n">4</b>바탕 색<em id="faceName"></em></h2>
   <div class="sw" id="faceSw"></div>
+  <button class="full" id="faceMore"></button>
+  <div class="sw sq" id="faceSw2" hidden></div>
 
   <h2><b class="n">5</b>이름 · 연락처<em id="txtCnt"></em></h2>
   <input type="text" id="txt" maxlength="12" placeholder="이름  예 : Coco" autocomplete="off">
@@ -346,7 +352,7 @@ const METALS=[
   {id:'gold',ko:'골드',base:'#D9B45A',hi:'#F6E3A1',lo:'#A9822F'},
   {id:'silver',ko:'실버',base:'#C9CCD1',hi:'#F4F5F7',lo:'#8E939B'},
   {id:'rose',ko:'로즈골드',base:'#D9A08E',hi:'#F5D2C6',lo:'#B07363'}];
-// 바탕 색 8종(인쇄면에 UV 인쇄). dark = 어두운 바탕 → 글씨 기본색이 화이트
+// 바탕 색 추천 8종(인쇄면에 UV 인쇄). dark = 어두운 바탕 → 글씨 기본색이 화이트. 그 밖의 색은 아래 FACE_MORE(글씨 색 팔레트 60색)
 const FACES=[
   {id:'cream',ko:'크림',hex:'#F3E7CF'},
   {id:'pink',ko:'핑크',hex:'#F4B6C2'},
@@ -387,6 +393,8 @@ const GRADS=[
 const TEXT_COLORS=[];
 SHADES.forEach((sh,r)=>HUES.forEach((h,i)=>TEXT_COLORS.push({id:'c'+(r*10+i+1),no:r*10+i+1,ko:h.names?h.names[r]:sh+h.ko,hex:h.c[r]})));
 GRADS.forEach((g,i)=>TEXT_COLORS.push({id:'g'+(i+1),no:51+i,ko:g.ko+' 그라데이션',hex:g.g[g.g.length>>1],grad:g.g}));
+// 바탕 색 더 보기: 글씨 색 팔레트 60색(단색 50 + 그라데이션 10)을 바탕에도 쓴다. id는 글씨 색과 같고, 이름 앞에 번호가 붙는다('12번 레드')
+const FACE_MORE=TEXT_COLORS.map(c=>{const n=parseInt(c.hex.slice(1),16);return{...c,ko:`${c.no}번 ${c.ko}`,dark:(.299*(n>>16&255)+.587*(n>>8&255)+.114*(n&255))/255<.5?1:0}});
 // 글씨체: 인식표 추천 4종(g:'rec')을 먼저, 기존 8종(g:'old'), 새로 고른 9종(g:'new') 순서. lat = 영문 전용, pair = 한글이 들어오면 대신 쓸 글씨체. fam = 웹폰트 이름, w = 굵기, label = 버튼에 보이는 글자
 // 추가하려면 맨 위 @font-face(또는 구글 폰트 주소)에도 넣어야 한다
 const FONTS=[
@@ -433,7 +441,7 @@ const SOLID={'❤':HEART_D,'🧡':HEART_D,'💛':HEART_D,'💚':HEART_D,'💙':H
 
 const $=s=>document.querySelector(s);
 const cv=$('#cv'),ctx=cv.getContext('2d'),stage=$('#stage'),thumbsEl=$('#thumbs');
-const byId=a=>Object.fromEntries(a.map(x=>[x.id,x])),KIND=byId(KINDS),METAL=byId(METALS),FACE=byId(FACES),TXTC=byId(TEXT_COLORS),FONT=byId(FONTS);
+const byId=a=>Object.fromEntries(a.map(x=>[x.id,x])),KIND=byId(KINDS),METAL=byId(METALS),FACE=byId([...FACES,...FACE_MORE]),TXTC=byId(TEXT_COLORS),FONT=byId(FONTS);
 const kindOf=p=>KIND[p.shape]||KINDS[0],szOf=p=>p.sz==='S'?'S':'L',skey=p=>kindOf(p).id+szOf(p),shapeOf=p=>SHAPES[skey(p)];
 const metalOf=p=>METAL[p.metal]||METALS[0],faceOf=p=>FACE[p.face]||FACES[0],txtCol=p=>TXTC[p.tcolor]||TEXT_COLORS[0],fontOf=p=>FONT[p.font]||FONTS[0];
 const defTcol=f=>DEF_TCOL[f.dark?'dark':'light'];
@@ -503,6 +511,8 @@ const P2={},pathOf=(key,f)=>P2[key+f]||(P2[key+f]=new Path2D(SHAPES[key][f]));
 // 글씨 색 칠하기: 단색은 그대로, 그라데이션은 줄의 왼쪽 위 → 오른쪽 아래로(45° 대각선) 색이 바뀐다. x,cy,w,h = 줄이 차지하는 상자(화면 좌표)
 function paintOf(c,col,x,cy,w,h){if(!col.grad)return col.hex;const d=(w+h)/2,g=c.createLinearGradient(x,cy-h/2,x+d,cy-h/2+d);col.grad.forEach((v,i)=>g.addColorStop(i/(col.grad.length-1),v));return g}
 const cssOf=col=>col.grad?`linear-gradient(135deg,${col.grad.join(',')})`:col.hex;
+// 바탕 색 칠하기(mm 좌표에서 쓴다): 그라데이션 바탕은 인쇄면 상자의 왼쪽 위 → 오른쪽 아래로 색이 바뀐다
+const facePaint=(c,p)=>{const b=shapeOf(p).faceBox;return paintOf(c,faceOf(p),b[0],(b[1]+b[3])/2,b[2]-b[0],b[3]-b[1])};
 function drawLine(c,k,ox,oy,p,ln){const px=ln.s*k,bw=ln.w*k,x0=ox+shapeOf(p).w/2*k-bw/2,cy=oy+ln.cy*k;
   c.save();c.textAlign='left';c.textBaseline='middle';const paint=paintOf(c,txtCol(p),x0,cy,bw,px);let x=x0;
   for(const r of runsOf(ln.t)){const key=emoKey(r.t),own=r.e&&p.scol!=='text'&&STKC[key],v=r.e&&STKV[key];c.fillStyle=own||paint;
@@ -522,7 +532,7 @@ function drawTag(c,k,ox,oy,p,o={}){const S=shapeOf(p),M=metalOf(p),[hx,hy,hr]=S.
   c.save();if(o.shadow){c.shadowColor=isLight()?'rgba(70,50,20,.3)':'rgba(0,0,0,.6)';c.shadowBlur=22;c.shadowOffsetY=9}
   c.fillStyle=metal(0,0,S.w,S.h);c.fill(body,'evenodd');c.restore();
   c.lineWidth=1/k;c.strokeStyle=edge;c.stroke(body);
-  const fp=pathOf(skey(p),'face');c.fillStyle=faceOf(p).hex;c.fill(fp); // 인쇄면: 테두리보다 낮은 면에 바탕 색
+  const fp=pathOf(skey(p),'face');c.fillStyle=facePaint(c,p);c.fill(fp); // 인쇄면: 테두리보다 낮은 면에 바탕 색
   c.save();c.clip(fp);c.translate(0,.16);c.lineWidth=.55;c.strokeStyle='rgba(0,0,0,.2)';c.stroke(fp);c.restore(); // 낮아진 면의 안쪽 그림자
   c.lineWidth=1/k;c.strokeStyle=edge;c.stroke(fp);
   c.restore();
@@ -566,7 +576,8 @@ function totals(){let kinds=0,total=0; // 이름이 있는 인식표만 센다
   for(const p of state.tags){if(!hasText(p))continue;kinds++;total+=qtyOf(p)}return{kinds,total}}
 const sumText=t=>`${t.kinds}종 · 총 ${t.total}개`;
 function syncUI(){const p=cur(),on=(sel,key,val)=>document.querySelectorAll(sel+' button').forEach(b=>b.classList.toggle('on',b.dataset[key]===val));
-  on('#shapeSeg','s',kindOf(p).id);on('#szSeg','z',szOf(p));on('#metalSw','c',metalOf(p).id);on('#faceSw','c',faceOf(p).id);
+  on('#shapeSeg','s',kindOf(p).id);on('#szSeg','z',szOf(p));on('#metalSw','c',metalOf(p).id);on('#faceSw','c',faceOf(p).id);on('#faceSw2','c',faceOf(p).id);
+  const more=$('#faceSw2');more.hidden=!(faceOpen||!FACES.includes(faceOf(p)));$('#faceMore').textContent=more.hidden?'색 더 보기 ▾ (60색 · 그라데이션 포함)':'추천 색만 보기 ▴';
   on('#txtSw','c',p.tcolor);on('#fontSeg','f',p.font);on('#scolSeg','v',p.scol||'own');
   document.querySelectorAll('#szSeg button').forEach(b=>{b.textContent=`${b.dataset.z} · ${kindOf(p).dim[b.dataset.z]}`});
   $('#shapeName').textContent=kindOf(p).ko;$('#sizeName').textContent=dimOf(p);$('#metalName').textContent=metalOf(p).ko;$('#faceName').textContent=faceOf(p).ko;
@@ -596,6 +607,8 @@ $('#shapeSeg').innerHTML=KINDS.map(k=>{const S=SHAPES[k.id+'L'],[hx,hy,hr]=S.hol
 $('#szSeg').innerHTML='<button data-z="S"></button><button data-z="L"></button>';
 $('#metalSw').innerHTML=METALS.map(c=>`<button data-c="${c.id}" title="${c.ko}" aria-label="${c.ko}" style="background:linear-gradient(135deg,${c.hi},${c.base} 50%,${c.lo})"></button>`).join('');
 $('#faceSw').innerHTML=FACES.map(c=>`<button data-c="${c.id}" title="${c.ko}" aria-label="${c.ko}" style="background:${c.hex}"></button>`).join('');
+$('#faceSw2').innerHTML=FACE_MORE.map(c=>`<button data-c="${c.id}" title="${c.ko}" aria-label="${c.ko}" style="background:${cssOf(c)}"></button>`).join('');
+let faceOpen=false;$('#faceMore').onclick=()=>{faceOpen=$('#faceSw2').hidden;syncUI()}; // 색 더 보기 펼치기·접기(펼친 색을 쓰는 중이면 접히지 않는다)
 $('#txtSw').innerHTML=TEXT_COLORS.map(c=>`<button data-c="${c.id}" title="${c.no}번 ${c.ko}" aria-label="${c.no}번 ${c.ko}" style="background:${cssOf(c)}"></button>`).join('');
 // 스티커: 분류 탭을 누르면 그 분류의 그림이 뜨고, 그림을 누르면 문구의 커서 자리에 들어간다
 let stkCat=0;
@@ -615,8 +628,9 @@ const pick=(sel,key,field)=>$(sel).addEventListener('click',e=>{const b=e.target
 pick('#shapeSeg','s','shape');pick('#szSeg','z','sz');pick('#metalSw','c','metal');pick('#txtSw','c','tcolor');
 pick('#scolSeg','v','scol');
 // 바탕 색: 글씨 색을 직접 고르지 않았으면(기본색 그대로면) 새 바탕에 맞는 기본색으로 따라간다
-$('#faceSw').addEventListener('click',e=>{const b=e.target.closest('button'),p=cur(),nf=b&&FACE[b.dataset.c];if(!nf||nf.id===faceOf(p).id)return;
-  if(p.tcolor===defTcol(faceOf(p)))p.tcolor=defTcol(nf);p.face=nf.id;commit();refresh()});
+const pickFace=e=>{const b=e.target.closest('button'),p=cur(),nf=b&&FACE[b.dataset.c];if(!nf||nf.id===faceOf(p).id)return;
+  if(p.tcolor===defTcol(faceOf(p)))p.tcolor=defTcol(nf);p.face=nf.id;commit();refresh()};
+$('#faceSw').addEventListener('click',pickFace);$('#faceSw2').addEventListener('click',pickFace);
 $('#fontSeg').addEventListener('click',e=>{const b=e.target.closest('button'),p=cur();if(!b)return;const old=p.font;p.font=b.dataset.f;pairFont(p);if(p.font!==old)commit();refresh()});
 $('#txt').addEventListener('input',e=>{cur().text=e.target.value;pairFont(cur());ensureFont(cur());syncUI();render();lazyCommit()});
 $('#tel').addEventListener('input',e=>{cur().tel=e.target.value;pairFont(cur());ensureFont(cur());syncUI();render();lazyCommit()});
@@ -700,7 +714,7 @@ function textImg(t,px){const c=document.createElement('canvas'),font=`700 ${px}p
 // 대지에 놓을 이미지(윤곽선을 만들 수 없을 때만 쓴다): 흰 바탕에 인쇄면의 바탕 색과 문구만. 크기 = 대지 전체
 function artOf(p){const k=DPI/25.4,S=shapeOf(p),c=document.createElement('canvas');c.width=Math.round(S.w*k);c.height=Math.round(S.h*k);
   const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);
-  x.save();x.scale(k,k);x.fillStyle=faceOf(p).hex;x.fill(pathOf(skey(p),'face'));x.restore();drawText(x,k,0,0,p);
+  x.save();x.scale(k,k);x.fillStyle=facePaint(x,p);x.fill(pathOf(skey(p),'face'));x.restore();drawText(x,k,0,0,p);
   return{im:toRgb(c),wmm:S.w,hmm:S.h}}
 // 예시 이미지: 회색 바탕에 인식표를 한 줄씩, 오른쪽에 옵션과 수량
 function proofCanvas(items,head){const k=5,W=1000,rh=VIEW.h*k+34,top=70,x0=60,tx=x0+VIEW.w*k+50,c=document.createElement('canvas');c.width=W;c.height=top+items.length*rh+10;
@@ -744,7 +758,7 @@ function parseD(d){const t=d.match(/[MLCZ]|-?\d*\.?\d+/g),out=[];let i=0,cmd;
 const moveCmds=(cmds,a,dx,dy)=>cmds.map(c=>{const o={type:c.type};for(const k of['x','x1','x2'])if(c[k]!=null)o[k]=c[k]*a+dx;for(const k of['y','y1','y2'])if(c[k]!=null)o[k]=c[k]*a+dy;return o});
 // 인식표 한 개의 인쇄 내용을 윤곽선으로: 인쇄면 도형(바탕 색) + 이름·연락처. 좌표는 대지 기준 mm(왼쪽 위가 0,0 = 인식표의 왼쪽 위)
 // 줄마다 색이 같은 것끼리 한 덩어리(layer)로 묶는다. x0·W·s·cy = 그 줄의 왼쪽 끝·폭·글자 크기·세로 중심(그라데이션 띠를 놓을 때 쓴다)
-async function vectorArt(p){const f=fontOf(p),col=txtCol(p),S=shapeOf(p),l=linesOf(p),vec=[{col:{hex:faceOf(p).hex},cmds:parseD(S.face)}];
+async function vectorArt(p){const f=fontOf(p),col=txtCol(p),S=shapeOf(p),l=linesOf(p),fb=S.faceBox,vec=[{col:faceOf(p),cmds:parseD(S.face),x0:fb[0],W:fb[2]-fb[0],s:fb[3]-fb[1],cy:(fb[1]+fb[3])/2}]; // 맨 아래 = 인쇄면(그라데이션 바탕이면 인쇄면 상자 크기의 색 띠를 도형으로 오려 낸다)
   for(const ln of[l.name,l.tel]){if(!ln)continue;const s=ln.s,parts=[];let W=0;
     for(const r of runsOf(ln.t)){const key=emoKey(r.t),own=r.e&&p.scol!=='text'&&STKC[key],v=r.e&&STKV[key];let part;
       if(v){const adv=s*ST.s*VW;part={adv,cmds:moveCmds(parseD(v.d),s*ST.s*.46,adv/2,0)}}
@@ -839,7 +853,7 @@ async function exportAll(){
     status('윤곽선 도구 준비 중…');let canVec=true;try{await loadLibs()}catch{canVec=false}
     status('예시 이미지 만드는 중…');await tick();
     const proof=toRgb(proofCanvas(items,`${BRAND}  ·  주문자 ${name}  ·  주문번호 ${ono}  ·  ${sum}`));
-    for(let i=0;i<items.length;i++){const {p,no,q}=items[i],S=shapeOf(p),l=linesOf(p),tc=tname(p),bn=`${no}_${kindOf(p).ko.replace(/\s/g,'')}${szOf(p)}_${metalOf(p).ko}_${faceOf(p).ko}_${q}개`;
+    for(let i=0;i<items.length;i++){const {p,no,q}=items[i],S=shapeOf(p),l=linesOf(p),tc=tname(p),bn=`${no}_${kindOf(p).ko.replace(/\s/g,'')}${szOf(p)}_${metalOf(p).ko}_${faceOf(p).ko.replace(/\s/g,'')}_${q}개`;
       status(`대지 만드는 중… ${i+1} / ${items.length}`);await tick();
       let art=null;if(canVec)try{art=await vectorArt(p)}catch{}
       const how=art?'윤곽선':'이미지';if(!art)art=artOf(p); // 윤곽선을 못 만들면(글꼴에 없는 글자 등) 이미지로 넣는다
