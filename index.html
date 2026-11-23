@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- © 2026 낭만인쇄소(위즈프로). All rights reserved. 이 에디터의 무단 복제·배포·사용을 금합니다. -->
 <html lang="ko">
 <head>
 <meta charset="utf-8">
@@ -194,16 +195,26 @@ small{color:var(--mut);display:block}
   .sw{gap:9px}
   .sw button{min-height:0}
 }
+.brandTag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:0;color:var(--mut);border:1px solid var(--line);border-radius:10px;padding:1px 8px;margin-right:8px;vertical-align:2px}
+.copyR{color:var(--mut);font-size:11px;white-space:nowrap}
 </style>
 </head>
 <body>
+<script>
+// 이 에디터는 낭만인쇄소(위즈프로)의 것입니다. 정해진 주소에서만 동작합니다.
+const BRAND='낭만인쇄소';
+const BRAND_HOSTS=['garam-wispro.github.io','localhost','127.0.0.1']; // 정식 주소 외에 허용하는 곳(기존 주소, 내 PC 미리보기)
+const brandHostOk=h=>BRAND_HOSTS.includes(h)||h==='prtromance.com'||h.endsWith('.prtromance.com');
+const BRAND_OK=location.protocol==='file:'||brandHostOk(location.hostname);
+</script>
 <div id="inapp" hidden>앱 안의 화면에서는 파일 저장이 안 될 수 있습니다. 크롬이나 사파리에서 열어 주세요.
   <button id="inappBtn" hidden>기본 브라우저로 열기</button> <button id="inappCopy">주소 복사</button></div>
 <header>
-  <h1><b>인식표</b> 에디터</h1>
+  <h1><span class="brandTag">낭만인쇄소</span><b>인식표</b> 에디터</h1>
   <button id="undo" title="Ctrl+Z">↶ 실행 취소</button>
   <button id="redo" title="Ctrl+Y">↷ 다시 실행</button>
   <div class="sp"></div>
+  <small class="pc copyR">© 낭만인쇄소 · 무단 복제·사용 금지</small>
   <div class="seg" id="themeSeg" title="작업 화면 색"><button data-t="light">화이트</button><button data-t="dark">블랙</button></div>
   <button id="tgGuide" class="on">가이드선</button>
   <button id="tgPrev" class="pri" title="전체 인식표가 어떻게 나오는지 보기">전체 미리보기</button>
@@ -312,6 +323,7 @@ small{color:var(--mut);display:block}
 </div></div>
 
 <script>
+if(!BRAND_OK){document.body.innerHTML='<div style="padding:48px 20px;text-align:center;font:15px/1.9 sans-serif">이 에디터는 '+BRAND+' 전용입니다.<br>정식 주소에서 이용해 주세요.</div>';throw new Error('허용되지 않은 주소')}
 // 새 버전이 올라왔는데 브라우저가 옛 화면을 기억하고 있으면, 열자마자 한 번 새로 받아 온다
 (()=>{if(!/^https?:$/.test(location.protocol))return;
   fetch(location.pathname,{method:'HEAD',cache:'no-store'}).then(r=>{const lm=Date.parse(r.headers.get('last-modified')||''),cur=Date.parse(document.lastModified);
@@ -826,7 +838,7 @@ async function exportAll(){
     if(items.some(it=>hasSticker(it.p)&&!document.fonts.check(emoCss(40),it.p.text)))throw new Error('스티커 글꼴을 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.');
     status('윤곽선 도구 준비 중…');let canVec=true;try{await loadLibs()}catch{canVec=false}
     status('예시 이미지 만드는 중…');await tick();
-    const proof=toRgb(proofCanvas(items,`주문자 ${name}  ·  주문번호 ${ono}  ·  ${sum}`));
+    const proof=toRgb(proofCanvas(items,`${BRAND}  ·  주문자 ${name}  ·  주문번호 ${ono}  ·  ${sum}`));
     for(let i=0;i<items.length;i++){const {p,no,q}=items[i],S=shapeOf(p),l=linesOf(p),tc=tname(p),bn=`${no}_${kindOf(p).ko.replace(/\s/g,'')}${szOf(p)}_${metalOf(p).ko}_${faceOf(p).ko}_${q}개`;
       status(`대지 만드는 중… ${i+1} / ${items.length}`);await tick();
       let art=null;if(canVec)try{art=await vectorArt(p)}catch{}
@@ -834,7 +846,7 @@ async function exportAll(){
       arts.push({...art,name:bn,label:textImg(`${no}  ${shapeLabel(p)} ${dimOf(p)}  ·  테두리 ${metalOf(p).ko}  ·  바탕 ${faceOf(p).ko}  ·  ${q}개  ·  글씨 ${tc}  ·  ${fontOf(p).ko}  ·  대지 ${S.w}×${+S.h.toFixed(1)}mm${art.vec?'':'  ·  이미지'}`,40)});
       rows.push(`${no}번 | ${shapeLabel(p)} ${dimOf(p)} | ${metalOf(p).ko} | ${faceOf(p).ko} | ${p.text} | ${hasTel(p)?p.tel.trim():'-'} | ${fontOf(p).ko} | ${tc} | 이름 ${l.name.s.toFixed(1)}mm${l.tel?` / 연락처 ${l.tel.s.toFixed(1)}mm`:''} | ${hasSticker(p)?(p.scol==='text'?'글씨 색':'원래 색'):'-'} | ${q}개 | ${bn} | ${how}`)}
     status('파일로 묶는 중…');await tick();
-    const sheet=['[인식표 주문 내역]',`주문자명: ${name}`,`주문번호: ${ono}`,`작성일시: ${n.getFullYear()}-${p2(n.getMonth()+1)}-${p2(n.getDate())} ${p2(n.getHours())}:${p2(n.getMinutes())}`,
+    const sheet=['['+BRAND+' 인식표 주문 내역]',`주문자명: ${name}`,`주문번호: ${ono}`,`작성일시: ${n.getFullYear()}-${p2(n.getMonth()+1)}-${p2(n.getDate())} ${p2(n.getHours())}:${p2(n.getMinutes())}`,
       '인쇄: 앞면(테두리 안쪽의 낮은 면) 한 면 — 바탕 색 + 이름 + 연락처. 테두리·고리·뒷면은 인쇄하지 않습니다.',`합계: ${sum}`,
       `EPS: 맨 위에 예시 이미지, 아래에 인식표마다 대지 1개. 대지 크기 = 그 인식표의 고리 포함 전체 크기이고, 대지의 왼쪽 위 모서리가 인식표(고리 포함) 외곽 상자의 왼쪽 위 모서리입니다. 대지에는 인쇄되는 것만(인쇄면 도형에 바탕 색, 이름·연락처) 들어 있고 금속 외곽과 고리 구멍은 없습니다. 도형과 글자는 윤곽선(벡터)이며, 윤곽선을 만들 수 없는 경우에만 이미지(${DPI}dpi)로 넣습니다.`,
       '화이트는 완전한 흰색이 아니라 옐로우 2%(C0 M0 Y2 K0)로 들어 있습니다. 그라데이션 글씨는 색 띠 그림을 글자 윤곽선으로 오려 낸(클리핑) 형태입니다.','',
