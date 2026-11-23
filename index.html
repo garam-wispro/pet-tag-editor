@@ -126,6 +126,7 @@ small{color:var(--mut);display:block}
 .shp svg{width:32px;height:28px;fill:currentColor;opacity:.8}
 #metalSw button{box-shadow:none}
 #faceSw{margin-bottom:8px}
+h2+.fgrp{margin-top:0}
 #applyAll{margin:0}
 .qty{display:flex;align-items:center;gap:5px;margin-bottom:6px}
 .qty button{padding:4px 10px}
@@ -232,7 +233,9 @@ const BRAND_OK=location.protocol==='file:'||brandHostOk(location.hostname);
   <div class="sw" id="metalSw"></div>
 
   <h2><b class="n">4</b>바탕 색<em id="faceName"></em></h2>
+  <div class="fgrp">인기 컬러</div>
   <div class="sw" id="faceSw"></div>
+  <div class="fgrp">전체 컬러</div>
   <div class="sw sq" id="faceSw2"></div>
 
   <h2><b class="n">5</b>이름 · 연락처<em id="txtCnt"></em></h2>
